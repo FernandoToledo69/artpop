@@ -4,7 +4,10 @@
 Explique o objetivo da aplicação e o problema que ela resolve.
 
 ## Integrantes
-Liste os integrantes da equipe.
+- Davi Lucas
+- Hugo Mendonça
+- Luiz Fernando Ramos de Toledo
+- Michel dos Santos Serpa
 
 ## Tecnologias utilizadas
 Liste frontend, backend, banco, autenticação, cache, fila e demais tecnologias.
