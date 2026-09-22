@@ -1,7 +1,7 @@
 'use client';
 
 import { ChangeEvent, FormEvent, useState } from 'react';
-import { createProduct } from '../../services/produtos.service';
+import { createProduct } from '../../services/api/produtos.service';
 import { ProductDraft } from '../../types/produto';
 
 const initialDraft: ProductDraft = {

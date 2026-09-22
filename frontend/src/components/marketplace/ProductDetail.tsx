@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
-import { readProducts } from '../../services/produtos.service';
+import { readProducts } from '../../services/api/produtos.service';
 import { readArtisanProfile } from '../../services/api/usuarios.service';
 import { Product } from '../../types/produto';
 import { demoProducts } from '../../mocks/products';

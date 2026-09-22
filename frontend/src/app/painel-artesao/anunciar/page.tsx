@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Anunciar Obra",
+};
+
 import ProductAnnouncementForm from '../../../components/forms/ProductAnnouncementForm';
 import ArtpopMark from '../../../components/ui/ArtpopMark';
 import ProfileAvatar from '../../../components/ui/ProfileAvatar';

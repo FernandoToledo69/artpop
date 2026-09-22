@@ -1,7 +1,7 @@
 'use client';
 
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { readProducts, updateProductStock } from '../../services/produtos.service';
+import { readProducts, updateProductStock } from '../../services/api/produtos.service';
 import { Product } from '../../types/produto';
 import { demoProducts } from '../../mocks/products';
 

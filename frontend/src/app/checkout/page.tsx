@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Checkout",
+};
+
 import PaymentForm from '../../components/checkout/PaymentForm';
 import ProfileAvatar from '../../components/ui/ProfileAvatar';
 import SiteHeader from '../../components/layout/SiteHeader';

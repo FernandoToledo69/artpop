@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Detalhes da Obra",
+};
+
 import ProductDetail from '../../../components/marketplace/ProductDetail';
 import ProfileAvatar from '../../../components/ui/ProfileAvatar';
 import CartLink from '../../../components/ui/CartLink';

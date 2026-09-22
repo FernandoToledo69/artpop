@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { demoProducts } from '../../mocks/products';
-import { readProducts } from '../../services/produtos.service';
+import { readProducts } from '../../services/api/produtos.service';
 import { readFavoriteIds, toggleFavorite } from '../../services/api/favoritos.service';
 import { Product } from '../../types/produto';
 import SiteHeader from '../../components/layout/SiteHeader';

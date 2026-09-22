@@ -2,7 +2,7 @@
 
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { demoProducts } from '../marketplace/MarketplaceProducts';
-import { readProducts, updateProduct } from '../../services/produtos.service';
+import { readProducts, updateProduct } from '../../services/api/produtos.service';
 import { Product, ProductDraft } from '../../types/produto';
 
 function fileToDataUrl(file: File): Promise<string> {

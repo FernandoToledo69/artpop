@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Editar Obra",
+};
+
 import ProductEditForm from '../../../../components/forms/ProductEditForm';
 import ProfileAvatar from '../../../../components/ui/ProfileAvatar';
 import CartLink from '../../../../components/ui/CartLink';

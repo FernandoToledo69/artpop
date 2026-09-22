@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Painel do Artesão",
+};
+
 import PublishedProducts from '../../components/artesao/PublishedProducts';
 import ProfileAvatar from '../../components/ui/ProfileAvatar';
 import CartLink from '../../components/ui/CartLink';
