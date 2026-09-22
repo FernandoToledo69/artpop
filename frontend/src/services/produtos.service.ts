@@ -31,10 +31,15 @@ export function readProducts(): Product[] {
   }
 }
 
-export function updateProductStock(productId: string, stock: number): Product | null {
+export function updateProductStock(productId: string, stock: number, fallbackProduct?: Product): Product | null {
   const products = readProducts();
   const productIndex = products.findIndex((product) => product.id === productId);
-  if (productIndex === -1) return null;
+  if (productIndex === -1) {
+    if (!fallbackProduct) return null;
+    const savedProduct = { ...fallbackProduct, stock };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([savedProduct, ...products]));
+    return savedProduct;
+  }
 
   const updatedProduct = { ...products[productIndex], stock };
   const updatedProducts = [...products];

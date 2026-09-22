@@ -23,7 +23,7 @@ export default function ArtisanProfileForm() {
 
   return (
     <form className="profile-form" onSubmit={handleSubmit}>
-      <div className="profile-form-heading"><div><p className="eyebrow">MEU CADASTRO</p><h2>Dados pessoais</h2><p>Atualize seus dados para manter seu perfil sempre correto.</p></div><span className="profile-initials" aria-hidden="true">AL</span></div>
+      <div className="profile-form-heading"><div><p className="eyebrow">MEU CADASTRO</p><h2>Dados pessoais</h2><p>Atualize seus dados para manter seu perfil sempre correto.</p></div><span className="profile-initials" aria-hidden="true">LG</span></div>
       <div className="field-grid">
         <label className="field field-wide">Nome completo<input value={profile.name} onChange={(event) => updateField('name', event.target.value)} /></label>
         <label className="field">E-mail<input type="email" value={profile.email} disabled /></label>

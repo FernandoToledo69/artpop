@@ -3,6 +3,7 @@
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { readProducts, updateProductStock } from '../../services/produtos.service';
 import { Product } from '../../types/produto';
+import { demoProducts } from '../marketplace/MarketplaceProducts';
 
 const categoryLabels: Record<Product['category'], string> = {
   ceramica: 'Cerâmica', madeira: 'Madeira', textil: 'Têxtil', joalheria: 'Joalheria', outros: 'Outros', '': 'Sem categoria',
@@ -13,7 +14,7 @@ export default function PublishedProducts() {
   const [query, setQuery] = useState('');
   const [savedProductId, setSavedProductId] = useState('');
 
-  useEffect(() => { setProducts(readProducts()); }, []);
+  useEffect(() => { setProducts([...demoProducts.filter((product) => product.artisanName === 'Stefani Germanotta'), ...readProducts()]); }, []);
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('pt-BR');
@@ -28,7 +29,7 @@ export default function PublishedProducts() {
   }
 
   function saveStock(product: Product) {
-    updateProductStock(product.id, product.stock);
+    updateProductStock(product.id, product.stock, product);
     setSavedProductId(product.id);
     window.setTimeout(() => setSavedProductId(''), 2200);
   }

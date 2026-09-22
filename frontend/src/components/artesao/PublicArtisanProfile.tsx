@@ -18,7 +18,7 @@ export default function PublicArtisanProfile() {
 
   return (
     <section className="public-profile" aria-labelledby="public-profile-title">
-      <div className="profile-avatar" aria-hidden="true">AL</div>
+      <div className="profile-avatar" aria-hidden="true">LG</div>
       <div><p className="eyebrow">ARTESÃO</p><h2 id="public-profile-title">{profile.name}</h2><p>{profile.bio}</p>{location && <span className="profile-location">{location}</span>}{profile.address && <span className="profile-location">{profile.address}</span>}{profile.phone && <span className="profile-location">{profile.phone}</span>}</div>
     </section>
   );

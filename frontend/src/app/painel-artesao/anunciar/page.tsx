@@ -4,7 +4,7 @@ import ArtpopMark from '../../../components/ui/ArtpopMark';
 export default function AnnounceProductPage() {
   return (
     <main className="page-shell">
-      <header className="topbar"><a className="brand-link" href="/"><img className="header-logo" src="/artpop_restaurada_alta_resolucao.png" alt="Logomarca artpop" /></a><nav><a href="/painel-artesao">Meu painel</a><a href="/produtos">Ver vitrine</a><span className="avatar">AL</span></nav></header>
+      <header className="topbar"><a className="brand-link" href="/"><img className="header-logo" src="/artpop_restaurada_alta_resolucao.png" alt="Logomarca artpop" /></a><nav><a href="/painel-artesao">Meu painel</a><a className="avatar" href="/perfil" aria-label="Abrir perfil de LG">LG</a></nav></header>
       <div className="breadcrumb"><a href="/painel-artesao">Painel do artesão</a><span>/</span><strong>Anunciar obra</strong></div>
       <section className="page-intro"><div className="intro-copy-block"><p className="eyebrow">CATÁLOGO <span>/</span> NOVA OBRA</p><h1>Publique um anúncio e<br /><span className="title-highlight">torne a sua arte mais popular</span></h1><p className="intro-copy">Compartilhe os detalhes da sua peça com quem valoriza o feito à mão e a história de cada origem.</p></div><div className="intro-brand"><img className="hero-logo" src="/artpop-branco.png" alt="Logomarca artpop branca" /></div></section>
       <ProductAnnouncementForm />
