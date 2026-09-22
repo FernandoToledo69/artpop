@@ -181,6 +181,15 @@ Quando a API for implementada, esta seção deve ser atualizada com endpoints, a
 
 Não há links de deploy publicados informados no repositório. Para publicar o frontend, uma opção compatível é configurar o projeto `frontend/` em uma plataforma que suporte Next.js, como Vercel, executando `npm run build` durante a etapa de build.
 
+## Documentação do projeto
+
+Os documentos de apoio ao desenvolvimento estão disponíveis no Google Docs e foram produzidos no contexto das disciplinas de Requisitos, Projeto de Software e Validação (RPSV).
+
+| Documento | Descrição | Link |
+| --- | --- | --- |
+| **Plano de Testes** | Define os cenários de teste para as funcionalidades da aplicação, cobrindo fluxos do comprador, artesão e administrador. | [Acessar documento](https://docs.google.com/document/d/1hCp5BICTYdz2LbNpYU1cTnWUnXM8GjpmJF-qIoFuACY/edit?tab=t.0#heading=h.8xb8w02r0qgu) |
+| **Backlog Priorizado** | Lista as histórias de usuário priorizadas pela técnica MoSCoW, organizadas em épicos como Gestão de Catálogo, Vitrine, Carrinho, Perfil do Artesão e Administração. | [Acessar documento](https://docs.google.com/document/d/1rnUwuTO_7RArdPtnSpCX4NN79ZVoZcF_feb5EoC23RQ/edit?tab=t.0) |
+
 ## Evidências
 
 - O catálogo inicial é carregado com obras demonstrativas no componente `MarketplaceProducts`.
