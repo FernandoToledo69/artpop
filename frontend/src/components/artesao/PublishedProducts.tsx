@@ -3,7 +3,7 @@
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { readProducts, updateProductStock } from '../../services/produtos.service';
 import { Product } from '../../types/produto';
-import { demoProducts } from '../marketplace/MarketplaceProducts';
+import { demoProducts } from '../../mocks/products';
 
 const categoryLabels: Record<Product['category'], string> = {
   ceramica: 'Cerâmica', madeira: 'Madeira', textil: 'Têxtil', joalheria: 'Joalheria', outros: 'Outros', '': 'Sem categoria',
@@ -51,7 +51,7 @@ export default function PublishedProducts() {
           <article className="product-row" key={product.id}>
             <div className="product-image">{product.mainImage ? <img src={product.mainImage} alt="" /> : <span aria-hidden="true">artpop</span>}</div>
             <div className="product-info"><h3>{product.title}</h3><p>{categoryLabels[product.category]} · {product.technique}</p><strong>R$ {product.price.toFixed(2).replace('.', ',')}</strong></div>
-            <div className="stock-control"><label htmlFor={`stock-${product.id}`}>Estoque disponível</label><div className="stock-input"><input id={`stock-${product.id}`} type="number" min="0" step="1" value={product.stock} onChange={(event) => handleStockChange(product.id, event)} /><span>un.</span></div><button type="button" onClick={() => saveStock(product)}>Confirmar estoque</button>{savedProductId === product.id && <small role="status">Estoque atualizado</small>}</div>
+            <div className="stock-control"><label htmlFor={`stock-${product.id}`}>Estoque disponível</label><div className="stock-input"><input id={`stock-${product.id}`} type="number" min="0" step="1" value={product.stock} onChange={(event) => handleStockChange(product.id, event)} /><span>un.</span></div><button type="button" onClick={() => saveStock(product)}>Confirmar estoque</button><a className="edit-product-link" href={`/painel-artesao/editar/${product.id}`}>Editar anúncio</a>{savedProductId === product.id && <small role="status">Estoque atualizado</small>}</div>
           </article>
         ))}</div>
       )}

@@ -6,4 +6,5 @@ export interface ArtisanProfile {
 	city: string;
 	state: string;
 	bio: string;
+	avatarImage: string;
 }

@@ -10,6 +10,7 @@ const defaultProfile: ArtisanProfile = {
 	city: '',
 	state: '',
 	bio: 'A cultura pop estava na arte, agora a arte está na cultura pop',
+	avatarImage: '',
 };
 
 export function readArtisanProfile(): ArtisanProfile {

@@ -47,3 +47,22 @@ export function updateProductStock(productId: string, stock: number, fallbackPro
   localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProducts));
   return updatedProduct;
 }
+
+export function updateProduct(productId: string, updates: ProductDraft, fallbackProduct?: Product): Product | null {
+  const products = readProducts();
+  const productIndex = products.findIndex((product) => product.id === productId);
+  const currentProduct = productIndex >= 0 ? products[productIndex] : fallbackProduct;
+  if (!currentProduct) return null;
+
+  const updatedProduct: Product = {
+    ...currentProduct,
+    ...updates,
+    price: Number(updates.price),
+    stock: Number(updates.stock),
+  };
+  const updatedProducts = productIndex >= 0
+    ? products.map((product, index) => index === productIndex ? updatedProduct : product)
+    : [updatedProduct, ...products];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProducts));
+  return updatedProduct;
+}

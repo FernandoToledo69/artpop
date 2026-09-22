@@ -1,0 +1,13 @@
+import { Product } from '../types/produto';
+
+export const demoProducts: Product[] = [
+  { id: 'stefani-1', title: 'Chromatic Pulse', category: 'outros', technique: 'Colagem digital', price: 198, stock: 5, createdAt: '2026-02-01', artisanCity: 'Recife', artisanName: 'Stefani Germanotta', artisanBio: 'A cultura pop estava na arte, agora a arte está na cultura pop', description: 'Uma composição vibrante que mistura recortes, textura e referências visuais da cultura pop.', mainImage: '', additionalImages: [] },
+  { id: 'demo-1', title: 'Vaso Maré Serena', category: 'ceramica', technique: 'Modelagem manual', price: 168, stock: 4, createdAt: '2026-01-10', artisanCity: 'Recife', description: 'Cerâmica de alta temperatura com acabamento natural.', mainImage: '', additionalImages: [] },
+  { id: 'demo-2', title: 'Sol de Dentro', category: 'madeira', technique: 'Xilogravura', price: 92, stock: 8, createdAt: '2026-01-12', artisanCity: 'Olinda', description: 'Gravura autoral impressa manualmente em papel algodão.', mainImage: '', additionalImages: [] },
+  { id: 'demo-3', title: 'Manta Caminho das Águas', category: 'textil', technique: 'Tear manual', price: 340, stock: 2, createdAt: '2026-01-15', artisanCity: 'Caruaru', description: 'Manta tecida com fios de algodão e lã reciclada.', mainImage: '', additionalImages: [] },
+  { id: 'demo-4', title: 'Colar Encanto do Capibaribe', category: 'joalheria', technique: 'Filigrana', price: 245, stock: 3, createdAt: '2026-01-18', artisanCity: 'Recife', description: 'Joia leve inspirada nas águas e pontes da cidade.', mainImage: '', additionalImages: [] },
+  { id: 'demo-5', title: 'Tábua Raízes', category: 'madeira', technique: 'Entalhe manual', price: 210, stock: 5, createdAt: '2026-01-20', artisanCity: 'Jaboatão dos Guararapes', description: 'Madeira reaproveitada entalhada peça a peça.', mainImage: '', additionalImages: [] },
+  { id: 'demo-6', title: 'Brisa em Fios', category: 'textil', technique: 'Macramê', price: 128, stock: 6, createdAt: '2026-01-22', artisanCity: 'Recife', description: 'Painel decorativo feito com cordão de algodão cru.', mainImage: '', additionalImages: [] },
+  { id: 'demo-7', title: 'Casario em Cores', category: 'outros', technique: 'Aquarela', price: 76, stock: 10, createdAt: '2026-01-24', artisanCity: 'Olinda', description: 'Aquarela original sobre papel de algodão.', mainImage: '', additionalImages: [] },
+  { id: 'demo-8', title: 'Cumbuca Terra Viva', category: 'ceramica', technique: 'Raku', price: 186, stock: 1, createdAt: '2026-01-26', artisanCity: 'Caruaru', description: 'Peça única queimada em forno raku com esmaltação artesanal.', mainImage: '', additionalImages: [] },
+];
