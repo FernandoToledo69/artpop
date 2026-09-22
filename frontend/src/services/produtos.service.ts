@@ -1,4 +1,5 @@
 import { Product, ProductDraft } from '../types/produto';
+import { readArtisanProfile } from './api/usuarios.service';
 
 const STORAGE_KEY = 'origem:products';
 
@@ -9,6 +10,7 @@ export async function createProduct(draft: ProductDraft): Promise<Product> {
     price: Number(draft.price),
     stock: Number(draft.stock),
     createdAt: new Date().toISOString(),
+    artisanCity: readArtisanProfile().city,
   };
 
   const savedProducts = readProducts();
@@ -20,8 +22,23 @@ export function readProducts(): Product[] {
   if (typeof window === 'undefined') return [];
 
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as Product[];
+    return (JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as Product[]).map((product) => ({
+      ...product,
+      artisanCity: product.artisanCity || readArtisanProfile().city,
+    }));
   } catch {
     return [];
   }
+}
+
+export function updateProductStock(productId: string, stock: number): Product | null {
+  const products = readProducts();
+  const productIndex = products.findIndex((product) => product.id === productId);
+  if (productIndex === -1) return null;
+
+  const updatedProduct = { ...products[productIndex], stock };
+  const updatedProducts = [...products];
+  updatedProducts[productIndex] = updatedProduct;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProducts));
+  return updatedProduct;
 }
