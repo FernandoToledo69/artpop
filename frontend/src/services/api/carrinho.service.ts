@@ -35,12 +35,12 @@ function saveCart(items: CartItem[]): CartItem[] {
 	return items;
 }
 
-export function addToCart(product: Product): CartItem[] {
+export function addToCart(product: Product, quantityToAdd: number = 1): CartItem[] {
 	const items = readCart();
 	const existingItem = items.find((item) => item.id === product.id);
 
 	if (existingItem) {
-		existingItem.quantity = Math.min(existingItem.quantity + 1, product.stock);
+		existingItem.quantity = Math.min(existingItem.quantity + quantityToAdd, product.stock);
 		return saveCart([...items]);
 	}
 
@@ -50,7 +50,7 @@ export function addToCart(product: Product): CartItem[] {
 		artisanName: getArtisanName(product),
 		artisanCity: product.artisanCity,
 		price: product.price,
-		quantity: 1,
+		quantity: Math.min(quantityToAdd, product.stock),
 		stock: product.stock,
 		category: product.category,
 		mainImage: product.mainImage,
