@@ -6,14 +6,14 @@ const STORAGE_KEY = 'origem:products';
 
 const catalogImages: Record<string, string> = {
   'stefani-1': 'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&w=900&q=85',
-  'demo-1': 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=900&q=85',
-  'demo-2': 'https://images.unsplash.com/photo-1610701596061-2ecf227e85b2?auto=format&fit=crop&w=900&q=85',
-  'demo-3': 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=900&q=85',
-  'demo-4': 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=900&q=85',
-  'demo-5': 'https://images.unsplash.com/photo-1601058268499-e52658b8bb88?auto=format&fit=crop&w=900&q=85',
-  'demo-6': 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=900&q=85',
-  'demo-7': 'https://images.unsplash.com/photo-1561214115-f2f134cc4912?auto=format&fit=crop&w=900&q=85',
-  'demo-8': 'https://images.unsplash.com/photo-1610701596061-2ecf227e85b2?auto=format&fit=crop&w=900&q=85',
+  'demo-1': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4vastJAhGTtd-oop9R68NQCR5NZg3Q2En_wOtpmrTTg&s',
+  'demo-2': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYHtew26nGqIHbOPfxir6vSz3ulCU_2IxwBEsGuxILsA&s',
+  'demo-3': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTReBMm8JrHMHLJWMFwwKa9ffxQJICQH5MvgSoce2ScAQ&s',
+  'demo-4': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSS82Me8J_zrUee80e5cZBJsHBNa5dz0tY78vaSVqWwES_ik3zn7gw6t4U&s=10',
+  'demo-5': 'https://assets.sistemawbuy.com.br/arquivos/25da0811fb048bfc1888f770199b3664/produtos/69795c698a973/img_2590-69795dd2b06fd.jpg',
+  'demo-6': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXmeVML2NbQcCgXkbL5eW5vhLdmIWZHeKFo2ffZVfcFmlYGeTGh5Z6yP-C&s=10',
+  'demo-7': 'https://cdn.awsli.com.br/800x800/624/624507/produto/347128140/xilogravura_22-w5ta0rvrxy.jpg',
+  'demo-8': 'https://letseatit.com.br/cdn/shop/files/WhatsAppImage2026-02-10at15.13.49.jpg?v=1770747692',
 };
 
 export async function createProduct(draft: ProductDraft): Promise<Product> {
