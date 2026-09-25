@@ -119,11 +119,11 @@ No PowerShell, o mesmo comando pode ser executado a partir do diretório `fronte
 ### Checkout e pagamentos
 
 - Checkout protegido para usuários autenticados.
-- Opções de Pix, cartão de crédito, cartão de débito e PopCard.
+- Opções de Pix, cartão de crédito e cartão de débito.
 - Pix com chave de pagamento, botão para copiar a chave e QR Code simulado.
 - Cartões com tokenização simulada, armazenamento apenas da bandeira e últimos quatro dígitos.
 - Botão de finalizar compra disponível junto ao salvamento do cartão.
-- PopCard representado como método futuro com fluxo simulado.
+- Cinco cupons fictícios disponíveis no carrinho: `ARTPOP10`, `BEMVINDO15`, `FEITOAMANO20`, `FRETEGRATIS` e `CULTURA25`.
 - Pedido criado somente quando há usuário autenticado e itens no carrinho.
 
 ### Autenticação, privacidade e segurança
@@ -261,7 +261,8 @@ Os documentos de apoio ao desenvolvimento estão disponíveis no Google Docs e f
 - A imagem principal e imagens adicionais são convertidas localmente para Data URLs.
 - O campo de quantidade no botão de compra respeita o estoque disponível e bloqueia quando esgotado.
 - Visitantes conseguem adicionar produtos ao carrinho, mas são redirecionados ao login ao tentar finalizar a compra.
-- Métodos Pix, cartão de crédito, cartão de débito e PopCard estão disponíveis no checkout.
+- Métodos Pix, cartão de crédito e cartão de débito estão disponíveis no checkout.
+- Cinco cupons fictícios podem ser aplicados no carrinho e refletidos no total do pedido.
 - O checkout redireciona usuários não autenticados para `/login` e o service de pedidos bloqueia chamadas sem sessão.
 - O cadastro valida CPF e telefone, exige consentimento de privacidade e não persiste a senha em texto puro.
 - O QR Code do Pix e dados da sessão são inicializados após a hidratação para evitar erros SSR/client.

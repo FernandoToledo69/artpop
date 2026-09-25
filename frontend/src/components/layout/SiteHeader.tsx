@@ -8,9 +8,9 @@ import { useEffect, useState } from 'react';
 interface SiteHeaderProps { minimal?: boolean; }
 
 export default function SiteHeader({ minimal = false }: SiteHeaderProps) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<ReturnType<typeof getCurrentUser>>(null);
   useEffect(() => {
-    const updateSession = () => setIsLoggedIn(Boolean(getCurrentUser()));
+    const updateSession = () => setUser(getCurrentUser());
     updateSession();
     window.addEventListener('auth-updated', updateSession);
     return () => window.removeEventListener('auth-updated', updateSession);
@@ -26,9 +26,9 @@ export default function SiteHeader({ minimal = false }: SiteHeaderProps) {
         <button type="submit">Buscar</button>
       </form>
       <nav>
-        {isLoggedIn ? <><a href="/aplausos">Aplausos</a><a href="/painel-artesao">Área do artesão</a></> : <><a href="/login">Entrar</a><a href="/cadastro">Cadastrar-se</a></>}
+        {user ? <><a href="/aplausos">Aplausos</a>{user.role === 'artisan' && <a href="/painel-artesao">Área do artesão</a>}{user.role === 'admin' && <a href="/admin">Administração</a>}</> : <><a href="/login">Entrar</a><a href="/cadastro">Cadastrar-se</a></>}
         <CartLink />
-        {isLoggedIn && <ProfileAvatar label="Abrir perfil" />}
+        {user && <ProfileAvatar label="Abrir perfil" />}
       </nav>
     </header>
   );

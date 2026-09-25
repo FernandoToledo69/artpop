@@ -148,7 +148,7 @@ interface Order {
   };
   status: 'Pendente' | 'Enviado' | 'Concluído' | 'Cancelado';
   payment: {
-    brand: 'Visa' | 'Mastercard' | 'Elo' | 'Cartão' | 'Pix' | 'PopCard';
+    brand: 'Visa' | 'Mastercard' | 'Elo' | 'Cartão' | 'Pix';
     last4: string;
   };
 }
@@ -168,7 +168,7 @@ Métodos de pagamento disponíveis no checkout:
 - Pix: chave local de demonstração e QR Code gerado por serviço externo.
 - Cartão de crédito: tokenização simulada e validação de Luhn.
 - Cartão de débito: usa o mesmo fluxo simulado de cartão.
-- PopCard: fluxo placeholder para implementação futura.
+- Cupons: `cupons.service.ts` mantém cinco códigos fictícios e calcula desconto percentual no carrinho.
 
 `createOrder` recusa a operação se não houver sessão autenticada ou itens no carrinho. Ao criar o pedido, o estoque local é reduzido e o carrinho é limpo.
 
@@ -320,7 +320,7 @@ Durante a transição, os componentes não devem ser alterados para conhecer det
 - Não há endpoints HTTP no backend atual.
 - `localStorage` não oferece isolamento, criptografia ou sincronização entre dispositivos.
 - O QR Code Pix depende de um serviço externo no protótipo.
-- O PopCard ainda é apenas uma opção visual/simulada.
+- Os cupons ainda são locais e fictícios; a validação definitiva deverá ocorrer no backend.
 - Não há gateway de pagamento real.
 - Não há garantia de concorrência ou reserva de estoque entre usuários.
 - A Fake API não substitui controles de segurança, LGPD e auditoria de produção.

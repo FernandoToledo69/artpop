@@ -3,6 +3,7 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { readArtisanProfile, updateArtisanProfile } from '../../services/api/usuarios.service';
 import { ArtisanProfile } from '../../types/usuario';
+import { getCurrentUser } from '../../services/api/auth.service';
 
 export default function ArtisanProfileForm() {
   const [profile, setProfile] = useState<ArtisanProfile>(readArtisanProfile);
@@ -13,7 +14,11 @@ export default function ArtisanProfileForm() {
   const [dragStartX, setDragStartX] = useState<number | null>(null);
   const [dragStartOffsetX, setDragStartOffsetX] = useState(0);
 
-  useEffect(() => { setProfile(readArtisanProfile()); }, []);
+  useEffect(() => {
+    const savedProfile = readArtisanProfile();
+    const user = getCurrentUser();
+    setProfile(user ? { ...savedProfile, name: user.name, email: user.email } : savedProfile);
+  }, []);
 
   function updateField(field: keyof ArtisanProfile, value: string) {
     setProfile((currentProfile) => ({ ...currentProfile, [field]: value }));

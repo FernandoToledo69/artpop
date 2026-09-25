@@ -1,6 +1,7 @@
 import { CartItem, readCart, readShippingSelection } from './carrinho.service';
 import { updateProductStock } from './produtos.service';
 import { getCurrentUser } from './auth.service';
+import { readAppliedCoupon, calculateDiscount } from './cupons.service';
 
 export type OrderStatus = 'Pendente' | 'Enviado' | 'Concluído' | 'Cancelado';
 
@@ -9,6 +10,7 @@ export interface Order {
 	createdAt: string;
 	items: CartItem[];
 	total: number;
+	discount?: number;
 	shipping?: { name: string; price: number; deliveryTime: string };
 	status: OrderStatus;
 	payment: Pick<PaymentProfile, 'brand' | 'last4'>;
@@ -17,7 +19,7 @@ export interface Order {
 const ORDERS_STORAGE_KEY = 'origem:orders';
 export interface PaymentProfile {
 	token: string;
-	brand: 'Visa' | 'Mastercard' | 'Elo' | 'Cartão' | 'Pix' | 'PopCard';
+	brand: 'Visa' | 'Mastercard' | 'Elo' | 'Cartão' | 'Pix';
 	last4: string;
 	updatedAt: string;
 }
@@ -46,7 +48,8 @@ export function createOrder(payment: PaymentProfile): Order | null {
 	if (items.length === 0) return null;
 	const shipping = readShippingSelection();
 	const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
-	const order: Order = { id: `PED-${Date.now().toString().slice(-6)}`, createdAt: new Date().toISOString(), items, total: subtotal + (shipping?.price ?? 0), shipping: shipping ? { name: shipping.name, price: shipping.price, deliveryTime: shipping.deliveryTime } : undefined, status: 'Pendente', payment: { brand: payment.brand, last4: payment.last4 } };
+	const discount = calculateDiscount(subtotal, readAppliedCoupon());
+	const order: Order = { id: `PED-${Date.now().toString().slice(-6)}`, createdAt: new Date().toISOString(), items, total: subtotal - discount + (shipping?.price ?? 0), discount, shipping: shipping ? { name: shipping.name, price: shipping.price, deliveryTime: shipping.deliveryTime } : undefined, status: 'Pendente', payment: { brand: payment.brand, last4: payment.last4 } };
 	items.forEach((item) => updateProductStock(item.id, Math.max(0, item.stock - item.quantity)));
 	localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify([order, ...readOrders()]));
 	localStorage.setItem('origem:cart', '[]');
