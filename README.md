@@ -23,7 +23,7 @@ A aplicação resolve o problema da pouca visibilidade de pequenos produtores e 
 
 ### Frontend
 
-- Next.js 14.2.15
+- Next.js 16.3.6
 - React 18.3.1
 - TypeScript 5.6.3
 - CSS global próprio e App Router do Next.js
@@ -33,6 +33,7 @@ A aplicação resolve o problema da pouca visibilidade de pequenos produtores e 
 - `localStorage` do navegador para armazenar perfil do artesão, obras publicadas e carrinho durante o protótipo.
 - Dados mockados para demonstrar o catálogo inicial.
 - `FileReader` para transformar imagens selecionadas em Data URLs no navegador.
+- Fake API de autenticação, pedidos, pagamentos, artesãos, recomendações e administração.
 
 ### Estrutura prevista
 
@@ -112,6 +113,31 @@ No PowerShell, o mesmo comando pode ser executado a partir do diretório `fronte
 - Campo para inserção de cupom de desconto.
 - Cálculo de frete simulado por CEP (PAC e Sedex) com valores dinâmicos por região.
 - Estado vazio com chamada para explorar obras.
+- O visitante pode navegar e adicionar produtos ao carrinho sem estar autenticado.
+- A finalização da compra exige uma sessão ativa e redireciona visitantes para `/login`.
+
+### Checkout e pagamentos
+
+- Checkout protegido para usuários autenticados.
+- Opções de Pix, cartão de crédito, cartão de débito e PopCard.
+- Pix com chave de pagamento, botão para copiar a chave e QR Code simulado.
+- Cartões com tokenização simulada, armazenamento apenas da bandeira e últimos quatro dígitos.
+- Botão de finalizar compra disponível junto ao salvamento do cartão.
+- PopCard representado como método futuro com fluxo simulado.
+- Pedido criado somente quando há usuário autenticado e itens no carrinho.
+
+### Autenticação, privacidade e segurança
+
+- Cadastro de comprador ou artesão com nome, e-mail, telefone, CPF e senha.
+- Validação de CPF e telefone no cadastro.
+- Senhas armazenadas como hash SHA-256 na Fake API, sem texto puro.
+- Sessões com expiração após oito horas.
+- Bloqueio temporário após cinco tentativas de login inválidas.
+- CPF armazenado como hash e últimos quatro dígitos; telefone armazenado mascarado.
+- Consentimento para tratamento de dados e página de [política de privacidade](frontend/src/app/privacidade/page.tsx).
+- Logout limpa sessão, carrinho, frete selecionado e cartão salvo do navegador.
+
+> **Limitação de segurança:** como esta versão usa `localStorage`, as medidas acima são adequadas somente ao protótipo. Antes de produção, autenticação, criptografia em repouso, autorização, rate limiting, HTTPS, auditoria, backups, recuperação de senha e controles LGPD devem ser implementados no backend.
 
 ### Perfil e painel do artesão
 
@@ -129,6 +155,9 @@ No PowerShell, o mesmo comando pode ser executado a partir do diretório `fronte
 - Breadcrumbs nas páginas internas para facilitar a navegação.
 - Layout responsivo: funciona em desktop e mobile.
 - Painel administrativo com estrutura inicial de rotas.
+- Cabeçalho público com `Entrar`, `Cadastrar-se` e `Carrinho` para visitantes.
+- Cabeçalho mínimo, centralizado e sem rodapé nas páginas de login e cadastro.
+- Indicadores de desenvolvimento do Next.js não fazem parte do deploy de produção.
 
 ### Estrutura de dados (Fake API)
 
@@ -137,6 +166,12 @@ No PowerShell, o mesmo comando pode ser executado a partir do diretório `fronte
   - `carrinho.service.ts` — Leitura, adição, remoção e atualização de itens do carrinho.
   - `usuarios.service.ts` — Leitura e atualização do perfil do artesão.
   - `favoritos.service.ts` — Controle de aplausos/favoritos.
+  - `auth.service.ts` — Cadastro, login, logout, expiração de sessão e limitação de tentativas.
+  - `pedidos.service.ts` — Pedidos, tokenização simulada, Pix, cartões e proteção de compra autenticada.
+  - `artesoes.service.ts` — Listagem e consulta de perfis públicos de artesãos.
+  - `recomendacoes.services.ts` — Produtos relacionados.
+  - `admin.service.ts` — Indicadores, catálogo e atualização de status de pedidos.
+  - `client.ts` — Reservado para o cliente HTTP do backend futuro.
 - Dados mockados em `src/mocks/products.ts` simulando obras de diferentes artesãos, cidades e categorias.
 - Tipos e interfaces centralizados em `src/types/` para os principais recursos (Produto, CartItem, etc.).
 - Estrutura preparada para substituição da Fake API pelo backend real na Avaliação 2, sem necessidade de reescrever a estrutura principal.
@@ -150,6 +185,9 @@ No PowerShell, o mesmo comando pode ser executado a partir do diretório `fronte
 | `/artesoes` | Listagem de artesãos |
 | `/artesoes/[id]` | Perfil público de um artesão |
 | `/carrinho` | Carrinho de compras |
+| `/checkout` | Checkout protegido por autenticação |
+| `/login` | Login do usuário |
+| `/cadastro` | Cadastro de comprador ou artesão |
 | `/pedidos` | Histórico de pedidos do comprador |
 | `/pedidos/[id]` | Detalhes de um pedido |
 | `/aplausos` | Obras aplaudidas pelo usuário |
@@ -158,6 +196,7 @@ No PowerShell, o mesmo comando pode ser executado a partir do diretório `fronte
 | `/painel-artesao/editar/[id]` | Edição de obra publicada |
 | `/painel-artesao/pedidos` | Pedidos recebidos pelo artesão |
 | `/admin` | Painel administrativo (estrutura inicial) |
+| `/privacidade` | Informações de privacidade e tratamento de dados |
 
 ## Rotas da API
 
@@ -174,12 +213,33 @@ As operações atualmente disponíveis acontecem no cliente:
 | Adicionar/remover do carrinho | `carrinho.service.ts` | `localStorage` (`origem:cart`) |
 | Calcular frete (simulado) | `carrinho.service.ts` | Cálculo local por CEP |
 | Aplausos/favoritos | `favoritos.service.ts` | `localStorage` (`origem:favorites`) |
+| Cadastro e login | `auth.service.ts` | `localStorage` (`origem:accounts`, `origem:session`) |
+| Criar pedido | `pedidos.service.ts` | `localStorage` (`origem:orders`), somente autenticado |
+| Pix e métodos de pagamento | `PaymentForm.tsx` / `pedidos.service.ts` | Simulação local e QR Code externo |
 
 Quando a API for implementada, esta seção deve ser atualizada com endpoints, autenticação, parâmetros e exemplos reais de requisição e resposta.
 
 ## Deploy
 
-Não há links de deploy publicados informados no repositório. Para publicar o frontend, uma opção compatível é configurar o projeto `frontend/` em uma plataforma que suporte Next.js, como Vercel, executando `npm run build` durante a etapa de build.
+O frontend está preparado para deploy em plataformas com suporte a Next.js.
+
+### Vercel
+
+- Root Directory: `frontend`
+- Build Command: `npm run build`
+- Install Command: `npm install`
+- Output Directory: deixar padrão do Next.js
+
+### Netlify
+
+O repositório possui [netlify.toml](netlify.toml) e usa `@netlify/plugin-nextjs`.
+
+- Base directory: `frontend`
+- Build Command: `npm run build`
+- Publish directory: `.next`
+- Package directory: deixar vazio
+
+Após alterar as configurações, execute um novo deploy limpando o cache do build. O backend ainda não é necessário para demonstrar os fluxos, pois a aplicação usa a Fake API local.
 
 ## Documentação do projeto
 
@@ -196,6 +256,11 @@ Os documentos de apoio ao desenvolvimento estão disponíveis no Google Docs e f
 - A publicação de uma obra exige os campos obrigatórios e mostra a mensagem de sucesso no próprio formulário.
 - A imagem principal e imagens adicionais são convertidas localmente para Data URLs.
 - O campo de quantidade no botão de compra respeita o estoque disponível e bloqueia quando esgotado.
+- Visitantes conseguem adicionar produtos ao carrinho, mas são redirecionados ao login ao tentar finalizar a compra.
+- Métodos Pix, cartão de crédito, cartão de débito e PopCard estão disponíveis no checkout.
+- O checkout redireciona usuários não autenticados para `/login` e o service de pedidos bloqueia chamadas sem sessão.
+- O cadastro valida CPF e telefone, exige consentimento de privacidade e não persiste a senha em texto puro.
+- O QR Code do Pix e dados da sessão são inicializados após a hidratação para evitar erros SSR/client.
 - O banner de destaque desaparece automaticamente ao buscar ou filtrar obras.
 - O comando de produção do frontend é `npm run build`.
 - Não há testes automatizados, prints ou vídeo versionados no repositório até o momento.
