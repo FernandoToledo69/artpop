@@ -245,6 +245,10 @@ Após alterar as configurações, execute um novo deploy limpando o cache do bui
 
 Os documentos de apoio ao desenvolvimento estão disponíveis no Google Docs e foram produzidos no contexto das disciplinas de Requisitos, Projeto de Software e Validação (RPSV).
 
+| Documento | Descrição |
+| --- | --- |
+| [Documentação inicial da Fake API](docs/fake-api.md) | Contratos atuais, persistência local, fluxos e roteiro de substituição pelo backend real. |
+
 | Documento | Descrição | Link |
 | --- | --- | --- |
 | **Plano de Testes** | Define os cenários de teste para as funcionalidades da aplicação, cobrindo fluxos do comprador, artesão e administrador. | [Acessar documento](https://docs.google.com/document/d/1hCp5BICTYdz2LbNpYU1cTnWUnXM8GjpmJF-qIoFuACY/edit?tab=t.0#heading=h.8xb8w02r0qgu) |
