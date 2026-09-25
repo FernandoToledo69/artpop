@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import '../styles/globals.css';
-import SiteFooter from '../components/layout/SiteFooter';
+import AppChrome from '../components/layout/AppChrome';
 
 export const metadata: Metadata = {
   title: {
@@ -11,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="pt-BR"><body>{children}<SiteFooter /></body></html>;
+  return <html lang="pt-BR"><body><AppChrome>{children}</AppChrome></body></html>;
 }

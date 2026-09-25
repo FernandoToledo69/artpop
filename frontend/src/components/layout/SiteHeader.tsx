@@ -2,8 +2,14 @@
 
 import CartLink from '../ui/CartLink';
 import ProfileAvatar from '../ui/ProfileAvatar';
+import { getCurrentUser } from '../../services/api/auth.service';
 
-export default function SiteHeader() {
+interface SiteHeaderProps { minimal?: boolean; }
+
+export default function SiteHeader({ minimal = false }: SiteHeaderProps) {
+  if (minimal) return <header className="topbar auth-topbar"><a className="brand-link" href="/"><img className="header-logo" src="/artpop_restaurada_alta_resolucao.png" alt="Logomarca artpop" /></a></header>;
+
+  const isLoggedIn = Boolean(getCurrentUser());
   return (
     <header className="topbar">
       <a className="brand-link" href="/"><img className="header-logo" src="/artpop_restaurada_alta_resolucao.png" alt="Logomarca artpop" /></a>
@@ -13,10 +19,9 @@ export default function SiteHeader() {
         <button type="submit">Buscar</button>
       </form>
       <nav>
-        <a href="/aplausos">Aplausos</a>
-        <a href="/painel-artesao">Área do artesão</a>
+        {isLoggedIn ? <><a href="/aplausos">Aplausos</a><a href="/painel-artesao">Área do artesão</a></> : <><a href="/login">Entrar</a><a href="/cadastro">Cadastrar-se</a></>}
         <CartLink />
-        <ProfileAvatar label="Abrir perfil de LG" />
+        {isLoggedIn && <ProfileAvatar label="Abrir perfil" />}
       </nav>
     </header>
   );

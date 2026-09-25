@@ -4,6 +4,18 @@ import { readArtisanProfile } from './usuarios.service';
 
 const STORAGE_KEY = 'origem:products';
 
+const catalogImages: Record<string, string> = {
+  'stefani-1': 'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&w=900&q=85',
+  'demo-1': 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=900&q=85',
+  'demo-2': 'https://images.unsplash.com/photo-1610701596061-2ecf227e85b2?auto=format&fit=crop&w=900&q=85',
+  'demo-3': 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=900&q=85',
+  'demo-4': 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=900&q=85',
+  'demo-5': 'https://images.unsplash.com/photo-1601058268499-e52658b8bb88?auto=format&fit=crop&w=900&q=85',
+  'demo-6': 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=900&q=85',
+  'demo-7': 'https://images.unsplash.com/photo-1561214115-f2f134cc4912?auto=format&fit=crop&w=900&q=85',
+  'demo-8': 'https://images.unsplash.com/photo-1610701596061-2ecf227e85b2?auto=format&fit=crop&w=900&q=85',
+};
+
 export async function createProduct(draft: ProductDraft): Promise<Product> {
   const product: Product = {
     ...draft,
@@ -35,7 +47,10 @@ export function readProducts(): Product[] {
 export function readCatalogProducts(): Product[] {
   const saved = readProducts();
   const savedIds = new Set(saved.map((product) => product.id));
-  return [...demoProducts.filter((product) => !savedIds.has(product.id)), ...saved];
+  return [...demoProducts.filter((product) => !savedIds.has(product.id)), ...saved].map((product) => ({
+    ...product,
+    mainImage: product.mainImage || catalogImages[product.id] || '',
+  }));
 }
 
 export function updateProductStock(productId: string, stock: number, fallbackProduct?: Product): Product | null {

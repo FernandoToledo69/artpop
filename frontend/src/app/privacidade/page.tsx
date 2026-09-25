@@ -1,0 +1,8 @@
+import type { Metadata } from 'next';
+import SiteHeader from '../../components/layout/SiteHeader';
+
+export const metadata: Metadata = { title: 'Política de privacidade' };
+
+export default function PrivacyPage() {
+  return <main className="page-shell"><SiteHeader /><div className="breadcrumb"><a href="/">Início</a><span>/</span><strong>Privacidade</strong></div><section className="page-intro"><div className="intro-copy-block"><p className="eyebrow">TRANSPARÊNCIA</p><h1>Política de<br /><span className="title-highlight">privacidade</span></h1><p className="intro-copy">Entenda como os dados são usados nesta versão demonstrativa da artpop.</p></div></section><section className="catalog-section privacy-content"><h2>Dados coletados</h2><p>Nome, e-mail, telefone e CPF são informados no cadastro para identificar e gerenciar a conta. O CPF não é exibido publicamente.</p><h2>Minimização e armazenamento</h2><p>Esta versão usa uma Fake API no navegador. A senha é armazenada somente como hash, o CPF é armazenado como hash e últimos dígitos, e o telefone é mantido apenas de forma mascarada.</p><h2>Seus direitos</h2><p>Você pode solicitar acesso, correção ou exclusão dos seus dados. Como esta é uma demonstração local, a remoção pode ser feita limpando os dados do site no navegador; no backend futuro, esses pedidos deverão ser atendidos por um fluxo próprio.</p><h2>Limitação do protótipo</h2><p>O armazenamento local não substitui criptografia em repouso, controle de acesso no servidor, auditoria, backups protegidos ou uma política jurídica completa. Esses controles serão obrigatórios antes da publicação com dados reais.</p></section></main>;
+}

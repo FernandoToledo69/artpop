@@ -6,8 +6,13 @@ export interface AuthUser {
   email: string;
   role: UserRole;
   artisanId?: string;
+  phoneLast4?: string;
+  cpfLast4?: string;
+  expiresAt?: number;
 }
 
 export interface AccountRecord extends AuthUser {
-  password: string;
+  passwordHash: string;
+  phoneMasked?: string;
+  cpfHash?: string;
 }
