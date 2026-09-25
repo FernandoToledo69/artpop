@@ -1,4 +1,5 @@
 import { AccountRecord, AuthUser, UserRole } from '../../types/auth';
+import { clearCart } from './carrinho.service';
 
 const ACCOUNTS_KEY = 'origem:accounts';
 const SESSION_KEY = 'origem:session';
@@ -42,5 +43,7 @@ export function register(name: string, email: string, password: string, role: Us
 
 export function logout(): void {
   localStorage.removeItem(SESSION_KEY);
+  clearCart();
+  localStorage.removeItem('origem:payment-profile');
   window.dispatchEvent(new Event('auth-updated'));
 }

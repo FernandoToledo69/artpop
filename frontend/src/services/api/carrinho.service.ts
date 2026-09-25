@@ -1,6 +1,7 @@
 import { Product } from '../../types/produto';
 
 const CART_STORAGE_KEY = 'origem:cart';
+const SHIPPING_SELECTION_KEY = 'origem:shipping-selection';
 
 export interface CartItem {
 	id: string;
@@ -33,6 +34,12 @@ function saveCart(items: CartItem[]): CartItem[] {
 	localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
 	window.dispatchEvent(new Event('cart-updated'));
 	return items;
+}
+
+export function clearCart(): void {
+	localStorage.removeItem(CART_STORAGE_KEY);
+	localStorage.removeItem(SHIPPING_SELECTION_KEY);
+	window.dispatchEvent(new Event('cart-updated'));
 }
 
 export function addToCart(product: Product, quantityToAdd: number = 1): CartItem[] {
@@ -80,8 +87,6 @@ export interface ShippingQuote {
 	postalCode: string;
 	options: ShippingOption[];
 }
-
-const SHIPPING_SELECTION_KEY = 'origem:shipping-selection';
 
 export function saveShippingSelection(option: ShippingOption): void { localStorage.setItem(SHIPPING_SELECTION_KEY, JSON.stringify(option)); }
 export function readShippingSelection(): ShippingOption | null {
