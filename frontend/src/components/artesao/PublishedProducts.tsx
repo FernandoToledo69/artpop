@@ -1,7 +1,7 @@
 'use client';
 
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { readProducts, updateProductStock } from '../../services/api/produtos.service';
+import { readCatalogProducts, updateProductStock } from '../../services/api/produtos.service';
 import { Product } from '../../types/produto';
 import { demoProducts } from '../../mocks/products';
 
@@ -14,7 +14,7 @@ export default function PublishedProducts() {
   const [query, setQuery] = useState('');
   const [savedProductId, setSavedProductId] = useState('');
 
-  useEffect(() => { setProducts([...demoProducts.filter((product) => product.artisanName === 'Stefani Germanotta'), ...readProducts()]); }, []);
+  useEffect(() => { setProducts(readCatalogProducts().filter((product) => product.artisanName === 'Stefani Germanotta')); }, []);
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('pt-BR');

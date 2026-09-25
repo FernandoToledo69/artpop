@@ -5,5 +5,6 @@ export const metadata: Metadata = {
 };
 
 import SiteHeader from '../../components/layout/SiteHeader';
+import LoginForm from '../../components/forms/LoginForm';
 
-export default function LoginPage() { return <main className="page-shell"><SiteHeader /></main>; }
+export default function LoginPage() { return <main className="page-shell"><SiteHeader /><section className="page-intro"><div className="intro-copy-block"><p className="eyebrow">ACESSO</p><h1>Entre na sua<br /><span className="title-highlight">conta</span></h1><p className="intro-copy">Acompanhe pedidos, favoritos e seus anúncios em um só lugar.</p></div></section><LoginForm /><p className="section-heading">Ainda não tem conta? <a href="/cadastro">Cadastre-se</a></p></main>; }

@@ -5,5 +5,6 @@ export const metadata: Metadata = {
 };
 
 import SiteHeader from '../../components/layout/SiteHeader';
+import AdminDashboard from '../../components/admin/AdminDashboard';
 
-export default function AdminPage() { return <main className="page-shell"><SiteHeader /></main>; }
+export default function AdminPage() { return <AdminDashboard />; }

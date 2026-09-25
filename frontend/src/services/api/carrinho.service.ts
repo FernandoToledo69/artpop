@@ -81,6 +81,14 @@ export interface ShippingQuote {
 	options: ShippingOption[];
 }
 
+const SHIPPING_SELECTION_KEY = 'origem:shipping-selection';
+
+export function saveShippingSelection(option: ShippingOption): void { localStorage.setItem(SHIPPING_SELECTION_KEY, JSON.stringify(option)); }
+export function readShippingSelection(): ShippingOption | null {
+	if (typeof window === 'undefined') return null;
+	try { return JSON.parse(localStorage.getItem(SHIPPING_SELECTION_KEY) ?? 'null') as ShippingOption | null; } catch { return null; }
+}
+
 export async function calculateShipping(postalCode: string): Promise<ShippingQuote> {
 	const normalizedPostalCode = postalCode.replace(/\D/g, '');
 

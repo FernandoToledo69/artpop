@@ -1,4 +1,5 @@
-import { CartItem, readCart } from './carrinho.service';
+import { CartItem, readCart, readShippingSelection } from './carrinho.service';
+import { updateProductStock } from './produtos.service';
 
 export type OrderStatus = 'Pendente' | 'Enviado' | 'Concluído' | 'Cancelado';
 
@@ -7,6 +8,7 @@ export interface Order {
 	createdAt: string;
 	items: CartItem[];
 	total: number;
+	shipping?: { name: string; price: number; deliveryTime: string };
 	status: OrderStatus;
 	payment: Pick<PaymentProfile, 'brand' | 'last4'>;
 }
@@ -40,7 +42,10 @@ export function readOrders(): Order[] {
 export function createOrder(payment: PaymentProfile): Order | null {
 	const items = readCart();
 	if (items.length === 0) return null;
-	const order: Order = { id: `PED-${Date.now().toString().slice(-6)}`, createdAt: new Date().toISOString(), items, total: items.reduce((total, item) => total + item.price * item.quantity, 0), status: 'Pendente', payment: { brand: payment.brand, last4: payment.last4 } };
+	const shipping = readShippingSelection();
+	const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
+	const order: Order = { id: `PED-${Date.now().toString().slice(-6)}`, createdAt: new Date().toISOString(), items, total: subtotal + (shipping?.price ?? 0), shipping: shipping ? { name: shipping.name, price: shipping.price, deliveryTime: shipping.deliveryTime } : undefined, status: 'Pendente', payment: { brand: payment.brand, last4: payment.last4 } };
+	items.forEach((item) => updateProductStock(item.id, Math.max(0, item.stock - item.quantity)));
 	localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify([order, ...readOrders()]));
 	localStorage.setItem('origem:cart', '[]');
 	window.dispatchEvent(new Event('cart-updated'));

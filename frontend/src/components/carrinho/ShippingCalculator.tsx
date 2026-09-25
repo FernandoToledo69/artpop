@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { calculateShipping, ShippingOption } from '../../services/api/carrinho.service';
+import { calculateShipping, saveShippingSelection, ShippingOption } from '../../services/api/carrinho.service';
 
 const formatCurrency = (value: number) => `R$ ${value.toFixed(2).replace('.', ',')}`;
 
@@ -26,6 +26,7 @@ export default function ShippingCalculator({ subtotal }: ShippingCalculatorProps
       const quote = await calculateShipping(postalCode);
       setOptions(quote.options);
       setSelectedOption(quote.options[0].id);
+      saveShippingSelection(quote.options[0]);
     } catch (shippingError) {
       setError(shippingError instanceof Error ? shippingError.message : 'Não foi possível calcular o frete.');
     } finally {

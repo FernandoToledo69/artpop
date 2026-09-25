@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { readArtisanProfile } from '../../services/api/usuarios.service';
+import { logout } from '../../services/api/auth.service';
 
 interface ProfileAvatarProps {
 	className?: string;
@@ -22,5 +23,5 @@ export default function ProfileAvatar({ className = 'avatar', label = 'Abrir per
 
 	if (!withMenu) return <span className={`${className}${image ? ' has-profile-image' : ''}`} aria-label={label}>{image ? <img src={image} alt="Foto do perfil" /> : 'LG'}</span>;
 
-	return <div className="profile-menu"><button className={`${className}${image ? ' has-profile-image' : ''}`} type="button" onClick={() => setIsOpen((current) => !current)} aria-label={label} aria-expanded={isOpen}>{image ? <img src={image} alt="Foto do perfil" /> : 'LG'}</button>{isOpen && <div className="profile-menu-dropdown"><a href="/pedidos">Meus pedidos</a><a href="/perfil">Editar perfil</a><a href="/login">Sair</a></div>}</div>;
+	return <div className="profile-menu"><button className={`${className}${image ? ' has-profile-image' : ''}`} type="button" onClick={() => setIsOpen((current) => !current)} aria-label={label} aria-expanded={isOpen}>{image ? <img src={image} alt="Foto do perfil" /> : 'LG'}</button>{isOpen && <div className="profile-menu-dropdown"><a href="/pedidos">Meus pedidos</a><a href="/perfil">Editar perfil</a><button type="button" onClick={() => { logout(); window.location.href = '/login'; }}>Sair</button></div>}</div>;
 }

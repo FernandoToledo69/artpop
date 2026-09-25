@@ -1,4 +1,5 @@
 import { Product, ProductDraft } from '../../types/produto';
+import { demoProducts } from '../../mocks/products';
 import { readArtisanProfile } from './usuarios.service';
 
 const STORAGE_KEY = 'origem:products';
@@ -31,12 +32,19 @@ export function readProducts(): Product[] {
   }
 }
 
+export function readCatalogProducts(): Product[] {
+  const saved = readProducts();
+  const savedIds = new Set(saved.map((product) => product.id));
+  return [...demoProducts.filter((product) => !savedIds.has(product.id)), ...saved];
+}
+
 export function updateProductStock(productId: string, stock: number, fallbackProduct?: Product): Product | null {
   const products = readProducts();
   const productIndex = products.findIndex((product) => product.id === productId);
   if (productIndex === -1) {
-    if (!fallbackProduct) return null;
-    const savedProduct = { ...fallbackProduct, stock };
+    const sourceProduct = fallbackProduct ?? demoProducts.find((product) => product.id === productId);
+    if (!sourceProduct) return null;
+    const savedProduct = { ...sourceProduct, stock };
     localStorage.setItem(STORAGE_KEY, JSON.stringify([savedProduct, ...products]));
     return savedProduct;
   }

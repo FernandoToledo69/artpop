@@ -2,7 +2,7 @@
 
 import type { MouseEvent } from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import { readProducts } from '../../services/api/produtos.service';
+import { readCatalogProducts } from '../../services/api/produtos.service';
 import { Product } from '../../types/produto';
 import { demoProducts } from '../../mocks/products';
 import { readFavoriteIds, toggleFavorite } from '../../services/api/favoritos.service';
@@ -22,7 +22,7 @@ export default function MarketplaceProducts() {
   const [sortOrder, setSortOrder] = useState('relevance');
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
 
-  useEffect(() => { setProducts([...demoProducts, ...readProducts()]); setFavoriteIds(readFavoriteIds()); setQuery(new URLSearchParams(window.location.search).get('q') ?? ''); }, []);
+  useEffect(() => { setProducts(readCatalogProducts()); setFavoriteIds(readFavoriteIds()); setQuery(new URLSearchParams(window.location.search).get('q') ?? ''); }, []);
 
   function handleFavorite(event: MouseEvent<HTMLButtonElement>, productId: string) {
     event.preventDefault();

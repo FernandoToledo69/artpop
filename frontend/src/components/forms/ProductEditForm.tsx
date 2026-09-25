@@ -2,7 +2,7 @@
 
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { demoProducts } from '../marketplace/MarketplaceProducts';
-import { readProducts, updateProduct } from '../../services/api/produtos.service';
+import { readCatalogProducts, updateProduct } from '../../services/api/produtos.service';
 import { Product, ProductDraft } from '../../types/produto';
 
 function fileToDataUrl(file: File): Promise<string> {
@@ -21,7 +21,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
 	const [successMessage, setSuccessMessage] = useState('');
 
 	useEffect(() => {
-		const foundProduct = [...demoProducts, ...readProducts()].find((item) => item.id === productId) ?? null;
+		const foundProduct = readCatalogProducts().find((item) => item.id === productId) ?? null;
 		setProduct(foundProduct);
 		if (foundProduct) setDraft({ ...foundProduct, price: String(foundProduct.price), stock: String(foundProduct.stock) });
 	}, [productId]);
