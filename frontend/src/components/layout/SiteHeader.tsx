@@ -3,13 +3,20 @@
 import CartLink from '../ui/CartLink';
 import ProfileAvatar from '../ui/ProfileAvatar';
 import { getCurrentUser } from '../../services/api/auth.service';
+import { useEffect, useState } from 'react';
 
 interface SiteHeaderProps { minimal?: boolean; }
 
 export default function SiteHeader({ minimal = false }: SiteHeaderProps) {
-  if (minimal) return <header className="topbar auth-topbar"><a className="brand-link" href="/"><img className="header-logo" src="/artpop_restaurada_alta_resolucao.png" alt="Logomarca artpop" /></a></header>;
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  useEffect(() => {
+    const updateSession = () => setIsLoggedIn(Boolean(getCurrentUser()));
+    updateSession();
+    window.addEventListener('auth-updated', updateSession);
+    return () => window.removeEventListener('auth-updated', updateSession);
+  }, []);
 
-  const isLoggedIn = Boolean(getCurrentUser());
+  if (minimal) return <header className="topbar auth-topbar"><a className="brand-link" href="/"><img className="header-logo" src="/artpop_restaurada_alta_resolucao.png" alt="Logomarca artpop" /></a></header>;
   return (
     <header className="topbar">
       <a className="brand-link" href="/"><img className="header-logo" src="/artpop_restaurada_alta_resolucao.png" alt="Logomarca artpop" /></a>

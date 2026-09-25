@@ -16,7 +16,7 @@ export interface Order {
 const ORDERS_STORAGE_KEY = 'origem:orders';
 export interface PaymentProfile {
 	token: string;
-	brand: 'Visa' | 'Mastercard' | 'Elo' | 'Cartão';
+	brand: 'Visa' | 'Mastercard' | 'Elo' | 'Cartão' | 'Pix' | 'PopCard';
 	last4: string;
 	updatedAt: string;
 }

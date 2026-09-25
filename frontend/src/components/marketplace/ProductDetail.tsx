@@ -60,7 +60,7 @@ export default function ProductDetail({ productId }: { productId: string }) {
   const galleryImages = [product.mainImage, ...product.additionalImages].filter(Boolean);
   const selectedImage = galleryImages[activeImage] ?? '';
 
-  const relatedProducts = readRelatedProducts(product);
+  const relatedProducts = readRelatedProducts(product, 3);
   return (
     <div className="product-detail">
       <div className="product-detail-visual"><div style={{ position: 'relative' }}><button className={`favorite-button${applauded ? ' is-favorite' : ''}`} type="button" onClick={handleApplause} title="aplaudir" aria-label={applauded ? 'Remover aplauso' : 'aplaudir'} aria-pressed={applauded}>👏</button><div className={`marketplace-image marketplace-image-${product.category}`}><span>{selectedImage ? <img src={selectedImage} alt={`${product.title} - imagem ${activeImage + 1}`} /> : 'FORMA'}</span></div></div>{galleryImages.length > 1 && <div className="product-gallery" aria-label="Galeria de imagens da obra">{galleryImages.map((image, index) => <button className={index === activeImage ? 'active' : ''} type="button" key={image} onClick={() => setActiveImage(index)} aria-label={`Ver imagem ${index + 1}`}><img src={image} alt="" /></button>)}</div>}</div>

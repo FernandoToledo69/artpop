@@ -5,7 +5,7 @@ import { readArtisanProfile } from '../../services/api/usuarios.service';
 import { ArtisanProfile } from '../../types/usuario';
 
 export default function PublicArtisanProfile() {
-  const [profile, setProfile] = useState<ArtisanProfile>(readArtisanProfile);
+  const [profile, setProfile] = useState<ArtisanProfile>({ name: '', email: '', phone: '', address: '', city: '', state: '', bio: '', avatarImage: '' });
 
   useEffect(() => {
     setProfile(readArtisanProfile());
