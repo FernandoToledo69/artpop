@@ -1,5 +1,6 @@
 import { CartItem, readCart, readShippingSelection } from './carrinho.service';
 import { updateProductStock } from './produtos.service';
+import { getCurrentUser } from './auth.service';
 
 export type OrderStatus = 'Pendente' | 'Enviado' | 'Concluído' | 'Cancelado';
 
@@ -40,6 +41,7 @@ export function readOrders(): Order[] {
 }
 
 export function createOrder(payment: PaymentProfile): Order | null {
+	if (!getCurrentUser()) return null;
 	const items = readCart();
 	if (items.length === 0) return null;
 	const shipping = readShippingSelection();

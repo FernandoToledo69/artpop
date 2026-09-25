@@ -1,12 +1,15 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createOrder, PaymentDetails, PaymentProfile, readPaymentProfile, savePaymentProfile, tokenizeCard } from '../../services/api/pedidos.service';
+import { getCurrentUser } from '../../services/api/auth.service';
 
 const emptyDetails: PaymentDetails = { cardholderName: '', cardNumber: '', expiryDate: '', securityCode: '' };
 type PaymentMethod = 'pix' | 'credit' | 'debit' | 'popcard';
 
 export default function PaymentForm() {
+  const router = useRouter();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('credit');
   const [details, setDetails] = useState(emptyDetails);
   const [savedCard, setSavedCard] = useState<PaymentProfile | null>(null);
@@ -46,6 +49,10 @@ export default function PaymentForm() {
   }
 
   function handleFinishPurchase() {
+    if (!getCurrentUser()) {
+      router.push('/login');
+      return;
+    }
     const payment: PaymentProfile = savedCard ?? { token: `tok_${paymentMethod}_${Date.now()}`, brand: paymentMethod === 'pix' ? 'Pix' : paymentMethod === 'popcard' ? 'PopCard' : 'Cartão', last4: paymentMethod === 'pix' ? 'PIX' : '0000', updatedAt: new Date().toISOString() };
     if (createOrder(payment)) setOrderCreated(true);
   }
