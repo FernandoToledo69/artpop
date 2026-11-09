@@ -7,7 +7,7 @@ import { getCurrentUser } from '../../services/api/auth.service';
 
 export default function ArtisanProfileForm() {
   const [profile, setProfile] = useState<ArtisanProfile>(readArtisanProfile);
-  const [saved, setSaved] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [cropSource, setCropSource] = useState('');
   const [cropZoom, setCropZoom] = useState(1);
   const [cropOffsetX, setCropOffsetX] = useState(0);
@@ -22,14 +22,14 @@ export default function ArtisanProfileForm() {
 
   function updateField(field: keyof ArtisanProfile, value: string) {
     setProfile((currentProfile) => ({ ...currentProfile, [field]: value }));
-    setSaved(false);
+    setShowSuccessModal(false);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     updateArtisanProfile(profile);
     window.dispatchEvent(new Event('profile-updated'));
-    setSaved(true);
+    setShowSuccessModal(true);
   }
 
   function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
@@ -38,7 +38,7 @@ export default function ArtisanProfileForm() {
     const reader = new FileReader();
     reader.onload = () => { setCropSource(String(reader.result)); setCropZoom(1); setCropOffsetX(0); };
     reader.readAsDataURL(file);
-    setSaved(false);
+    setShowSuccessModal(false);
   }
 
   function confirmCrop() {
@@ -84,7 +84,7 @@ export default function ArtisanProfileForm() {
         <label className="field">Estado<input maxLength={2} value={profile.state} onChange={(event) => updateField('state', event.target.value.toUpperCase())} placeholder="UF" /></label>
       </div>
       <div className="profile-form-footer"><p>As alterações aparecem no seu perfil público após salvar.</p><button type="submit">Salvar alterações</button></div>
-      {saved && <p className="success-message" role="status">Cadastro atualizado com sucesso.</p>}
+      {showSuccessModal && <div className="announcement-success-backdrop" role="presentation"><section className="announcement-success-modal" role="dialog" aria-modal="true" aria-labelledby="profile-success-title"><h2 id="profile-success-title">Cadastro atualizado</h2><p>Seus dados e sua foto de perfil foram atualizados com sucesso.</p><button className="announcement-success-link" type="button" onClick={() => setShowSuccessModal(false)}>Entendi</button></section></div>}
       {cropSource && <div className="crop-modal-backdrop" role="presentation"><section className="crop-modal" role="dialog" aria-modal="true" aria-labelledby="crop-title"><div className="crop-modal-heading"><div><p className="eyebrow">FOTO DO PERFIL</p><h2 id="crop-title">Ajuste sua imagem</h2><p>Arraste a imagem para os lados e recorte no formato quadrado.</p></div><button className="crop-close" type="button" onClick={() => setCropSource('')} aria-label="Cancelar recorte">×</button></div><div className="crop-preview" onPointerDown={startDragging} onPointerMove={dragImage} onPointerUp={stopDragging} onPointerCancel={stopDragging}><img src={cropSource} alt="Prévia para recorte" style={{ transform: `translateX(${cropOffsetX}px) scale(${cropZoom})` }} /></div><label className="crop-zoom">Zoom<input type="range" min="1" max="2.5" step=".1" value={cropZoom} onChange={(event) => setCropZoom(Number(event.target.value))} /></label><div className="crop-modal-actions"><button type="button" className="crop-cancel" onClick={() => setCropSource('')}>Cancelar</button><button type="button" onClick={confirmCrop}>Usar esta foto</button></div></section></div>}
     </form>
   );
