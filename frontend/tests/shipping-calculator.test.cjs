@@ -24,7 +24,7 @@ const {
   saveShippingSelection,
 } = require('../src/services/api/carrinho.service.ts');
 
-const SHIPPING_SELECTION_KEY = 'origem:shipping-selection';
+const SHIPPING_SELECTION_KEY = 'origem:shipping-selection:guest';
 
 let storage;
 

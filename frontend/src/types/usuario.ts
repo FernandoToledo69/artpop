@@ -1,10 +1,15 @@
-export interface ArtisanProfile {
+export interface PublicArtisanProfile {
 	name: string;
-	email: string;
 	phone: string;
-	address: string;
 	city: string;
 	state: string;
 	bio: string;
 	avatarImage: string;
+}
+
+export interface ArtisanProfile extends PublicArtisanProfile {
+	email: string;
+	address: string;
+	addressNumber: string;
+	addressComplement: string;
 }

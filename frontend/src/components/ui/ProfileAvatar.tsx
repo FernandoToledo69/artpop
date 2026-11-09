@@ -21,8 +21,9 @@ export default function ProfileAvatar({ className = 'avatar', label = 'Abrir per
 		updateImage();
 		updateUser();
 		window.addEventListener('profile-updated', updateImage);
+		window.addEventListener('auth-updated', updateImage);
 		window.addEventListener('auth-updated', updateUser);
-		return () => { window.removeEventListener('profile-updated', updateImage); window.removeEventListener('auth-updated', updateUser); };
+		return () => { window.removeEventListener('profile-updated', updateImage); window.removeEventListener('auth-updated', updateImage); window.removeEventListener('auth-updated', updateUser); };
 	}, []);
 
 	const initials = userName ? userName.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase() : 'LG';

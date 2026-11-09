@@ -10,9 +10,11 @@ export default function CartLink() {
 		const updateCount = () => setItemCount(readCart().reduce((total, item) => total + item.quantity, 0));
 		updateCount();
 		window.addEventListener('cart-updated', updateCount);
+		window.addEventListener('auth-updated', updateCount);
 		window.addEventListener('storage', updateCount);
 		return () => {
 			window.removeEventListener('cart-updated', updateCount);
+			window.removeEventListener('auth-updated', updateCount);
 			window.removeEventListener('storage', updateCount);
 		};
 	}, []);

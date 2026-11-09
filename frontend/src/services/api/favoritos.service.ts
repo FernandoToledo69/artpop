@@ -1,9 +1,9 @@
-import { getCurrentUser } from './auth.service';
+import { getUserScopedStorageKey } from './user-storage';
 
 const FAVORITES_STORAGE_KEY = 'origem:favorites';
 
 function getFavoritesStorageKey(): string {
-	return `${FAVORITES_STORAGE_KEY}:${getCurrentUser()?.id ?? 'guest'}`;
+	return getUserScopedStorageKey(FAVORITES_STORAGE_KEY);
 }
 
 export function readFavoriteIds(): string[] {

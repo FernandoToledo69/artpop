@@ -3,7 +3,6 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { formatPhone, readArtisanProfile, updateArtisanProfile } from '../../services/api/usuarios.service';
 import { ArtisanProfile } from '../../types/usuario';
-import { getCurrentUser } from '../../services/api/auth.service';
 
 export default function ArtisanProfileForm() {
   const [profile, setProfile] = useState<ArtisanProfile>(readArtisanProfile);
@@ -15,9 +14,7 @@ export default function ArtisanProfileForm() {
   const [dragStartOffsetX, setDragStartOffsetX] = useState(0);
 
   useEffect(() => {
-    const savedProfile = readArtisanProfile();
-    const user = getCurrentUser();
-    setProfile(user ? { ...savedProfile, name: user.name, email: user.email } : savedProfile);
+    setProfile(readArtisanProfile());
   }, []);
 
   function updateField(field: keyof ArtisanProfile, value: string) {
@@ -78,8 +75,10 @@ export default function ArtisanProfileForm() {
       <div className="field-grid">
         <label className="field field-wide">Nome completo<input value={profile.name} onChange={(event) => updateField('name', event.target.value)} /></label>
         <label className="field">E-mail<input type="email" value={profile.email} disabled /></label>
-        <label className="field">Telefone<input type="tel" inputMode="numeric" autoComplete="tel" maxLength={14} value={profile.phone} onChange={(event) => updateField('phone', formatPhone(event.target.value))} placeholder="(00)00000-0000" /></label>
-        <label className="field field-wide">Endereço<input value={profile.address} onChange={(event) => updateField('address', event.target.value)} placeholder="Rua, número e complemento" /></label>
+        <label className="field">Telefone<input type="tel" inputMode="numeric" autoComplete="tel" maxLength={15} value={profile.phone} onChange={(event) => updateField('phone', formatPhone(event.target.value))} placeholder="(00) 00000-0000" /></label>
+        <label className="field field-wide">Endereço<input value={profile.address} onChange={(event) => updateField('address', event.target.value)} placeholder="Rua, avenida, travessa..." /></label>
+        <label className="field">Número<input value={profile.addressNumber} onChange={(event) => updateField('addressNumber', event.target.value)} /></label>
+        <label className="field">Complemento<input value={profile.addressComplement} onChange={(event) => updateField('addressComplement', event.target.value)} placeholder="Apartamento, bloco, referência..." /></label>
         <label className="field">Cidade<input value={profile.city} onChange={(event) => updateField('city', event.target.value)} /></label>
         <label className="field">Estado<input maxLength={2} value={profile.state} onChange={(event) => updateField('state', event.target.value.toUpperCase())} placeholder="UF" /></label>
       </div>
