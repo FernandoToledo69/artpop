@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { calculateShipping, saveShippingSelection, ShippingOption } from '../../services/api/carrinho.service';
+import { calculateShipping, calculateShippingTotal, clearShippingSelection, formatPostalCode, saveShippingSelection, ShippingOption } from '../../services/api/carrinho.service';
 
 const formatCurrency = (value: number) => `R$ ${value.toFixed(2).replace('.', ',')}`;
 
@@ -24,6 +24,7 @@ export default function ShippingCalculator({ subtotal }: ShippingCalculatorProps
 
     try {
       const quote = await calculateShipping(postalCode);
+      if (quote.options.length === 0) throw new Error('Não há opções de entrega disponíveis para este CEP.');
       setOptions(quote.options);
       setSelectedOption(quote.options[0].id);
       saveShippingSelection(quote.options[0]);
@@ -32,6 +33,11 @@ export default function ShippingCalculator({ subtotal }: ShippingCalculatorProps
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function selectShippingOption(option: ShippingOption) {
+    setSelectedOption(option.id);
+    saveShippingSelection(option);
   }
 
   return (
@@ -45,11 +51,11 @@ export default function ShippingCalculator({ subtotal }: ShippingCalculatorProps
         <span className="shipping-icon" aria-hidden="true">↗</span>
       </div>
       <form className="shipping-form" onSubmit={handleSubmit}>
-        <label className="field">CEP<input inputMode="numeric" autoComplete="postal-code" value={postalCode} onChange={(event) => setPostalCode(event.target.value)} placeholder="00000-000" maxLength={9} aria-describedby={error ? 'shipping-error' : 'shipping-help'} /></label>
+        <label className="field">CEP<input inputMode="numeric" autoComplete="postal-code" value={postalCode} onChange={(event) => { setPostalCode(formatPostalCode(event.target.value)); setOptions([]); clearShippingSelection(); }} placeholder="00000-000" maxLength={9} aria-describedby={error ? 'shipping-error' : 'shipping-help'} /></label>
         <button type="submit" disabled={isLoading}>{isLoading ? 'Calculando...' : 'Calcular frete'}</button>
       </form>
       {error ? <p className="error" id="shipping-error" role="alert">{error}</p> : <p className="shipping-help" id="shipping-help">Digite os 8 números do seu CEP.</p>}
-      {options.length > 0 && <div className="shipping-options" aria-live="polite"><p className="shipping-options-title">Escolha uma opção de entrega</p>{options.map((option) => <label className={`shipping-option${selectedOption === option.id ? ' selected' : ''}`} key={option.id}><input type="radio" name="shipping-method" value={option.id} checked={selectedOption === option.id} onChange={() => setSelectedOption(option.id)} /><span><strong>{option.name}</strong><small>{option.description} · {option.deliveryTime}</small></span><b>{formatCurrency(option.price)}</b></label>)}<div className="shipping-total"><span>Total com frete</span><strong>{formatCurrency(subtotal + (options.find((option) => option.id === selectedOption)?.price ?? 0))}</strong></div></div>}
+      {options.length > 0 && <div className="shipping-options" aria-live="polite"><p className="shipping-options-title">Escolha uma opção de entrega</p>{options.map((option) => <label className={`shipping-option${selectedOption === option.id ? ' selected' : ''}`} key={option.id}><input type="radio" name="shipping-method" value={option.id} checked={selectedOption === option.id} onChange={() => selectShippingOption(option)} /><span><strong>{option.name}</strong><small>{option.description} · {option.deliveryTime}</small></span><b>{formatCurrency(option.price)}</b></label>)}<div className="shipping-total"><span>Total com frete</span><strong>{formatCurrency(calculateShippingTotal(subtotal, options.find((option) => option.id === selectedOption) ?? options[0]))}</strong></div></div>}
     </section>
   );
 }

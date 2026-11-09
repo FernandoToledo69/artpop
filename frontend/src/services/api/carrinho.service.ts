@@ -92,24 +92,34 @@ export interface ShippingQuote {
 	options: ShippingOption[];
 }
 
+export function formatPostalCode(value: string): string {
+	const digits = value.replace(/\D/g, '').slice(0, 8);
+	return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
+}
+
 export function saveShippingSelection(option: ShippingOption): void { localStorage.setItem(SHIPPING_SELECTION_KEY, JSON.stringify(option)); }
+export function clearShippingSelection(): void { localStorage.removeItem(SHIPPING_SELECTION_KEY); }
 export function readShippingSelection(): ShippingOption | null {
 	if (typeof window === 'undefined') return null;
 	try { return JSON.parse(localStorage.getItem(SHIPPING_SELECTION_KEY) ?? 'null') as ShippingOption | null; } catch { return null; }
 }
 
+export function calculateShippingTotal(subtotal: number, option: ShippingOption): number {
+	return Math.round((subtotal + option.price + Number.EPSILON) * 100) / 100;
+}
+
 export async function calculateShipping(postalCode: string): Promise<ShippingQuote> {
 	const normalizedPostalCode = postalCode.replace(/\D/g, '');
 
-	if (normalizedPostalCode.length !== 8) {
+	if (normalizedPostalCode.length !== 8 || /^(\d)\1{7}$/.test(normalizedPostalCode)) {
 		throw new Error('Informe um CEP válido com 8 números.');
 	}
 
 	await new Promise((resolve) => setTimeout(resolve, 350));
 
 	const regionalFactor = Number(normalizedPostalCode.slice(0, 2)) % 5;
-	const pacPrice = 18.9 + regionalFactor * 2.45;
-	const sedexPrice = pacPrice + 14.5;
+	const pacPrice = Math.round((18.9 + regionalFactor * 2.45 + Number.EPSILON) * 100) / 100;
+	const sedexPrice = Math.round((pacPrice + 14.5 + Number.EPSILON) * 100) / 100;
 
 	return {
 		postalCode: normalizedPostalCode,
