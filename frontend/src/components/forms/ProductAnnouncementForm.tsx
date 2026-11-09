@@ -3,6 +3,7 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { createProduct } from '../../services/api/produtos.service';
 import { ProductDraft } from '../../types/produto';
+import { appendAdditionalImages, MAX_ADDITIONAL_IMAGES, selectAdditionalImageFiles, validateProductDraft } from './product-announcement';
 
 const initialDraft: ProductDraft = {
   title: '',
@@ -28,12 +29,13 @@ export default function ProductAnnouncementForm() {
   const [draft, setDraft] = useState<ProductDraft>(initialDraft);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [publishedProductId, setPublishedProductId] = useState('');
 
   function updateField(field: keyof ProductDraft, value: string) {
     setDraft((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: '' }));
-    setSuccessMessage('');
+    setShowSuccessModal(false);
   }
 
   async function handleMainImage(event: ChangeEvent<HTMLInputElement>) {
@@ -47,36 +49,35 @@ export default function ProductAnnouncementForm() {
   }
 
   async function handleAdditionalImages(event: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(event.target.files ?? []).slice(0, 4);
-    const images = await Promise.all(files.filter((file) => file.type.startsWith('image/')).map(fileToDataUrl));
-    setDraft((current) => ({ ...current, additionalImages: images }));
+    const files = selectAdditionalImageFiles(Array.from(event.target.files ?? []), draft.additionalImages.length);
+    const images = await Promise.all(files.map(fileToDataUrl));
+    setDraft((current) => ({
+      ...current,
+      additionalImages: appendAdditionalImages(current.additionalImages, images),
+    }));
   }
 
   function validate() {
-    const nextErrors: Record<string, string> = {};
-    if (!draft.title.trim()) nextErrors.title = 'Dê um nome para sua obra.';
-    if (!draft.category) nextErrors.category = 'Escolha uma categoria.';
-    if (!draft.technique.trim()) nextErrors.technique = 'Informe a técnica utilizada.';
-    if (!draft.price || Number(draft.price) <= 0) nextErrors.price = 'Informe um preço maior que zero.';
-    if (!draft.stock || Number(draft.stock) < 1) nextErrors.stock = 'Informe ao menos uma unidade.';
-    if (draft.description.trim().length < 20) nextErrors.description = 'Conte um pouco mais sobre a obra (mínimo de 20 caracteres).';
-    if (!draft.mainImage) nextErrors.mainImage = 'A foto principal é obrigatória.';
+    const nextErrors = validateProductDraft(draft);
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSuccessMessage('');
+    setShowSuccessModal(false);
     if (!validate()) return;
 
     setIsSaving(true);
-    await createProduct(draft);
+    const product = await createProduct(draft);
     setDraft(initialDraft);
     setErrors({});
-    setSuccessMessage('Obra publicada com sucesso. Ela já está disponível no seu catálogo.');
+    setPublishedProductId(product.id);
+    setShowSuccessModal(true);
     setIsSaving(false);
   }
+
+  const remainingAdditionalImages = MAX_ADDITIONAL_IMAGES - draft.additionalImages.length;
 
   return (
     <form className="announcement-form" onSubmit={handleSubmit} noValidate>
@@ -115,7 +116,7 @@ export default function ProductAnnouncementForm() {
             {draft.mainImage ? <img src={draft.mainImage} alt="Prévia da foto principal" /> : <><span className="upload-icon">+</span><strong>Adicionar foto principal</strong><span>JPG ou PNG · até 5 MB</span></>}
             <input type="file" accept="image/png,image/jpeg" onChange={handleMainImage} />
           </label>
-          <div className="additional-upload"><p>Outras fotos <span>(opcional)</span></p><label className="secondary-upload"><span>+</span> Adicionar até 4 fotos<input type="file" accept="image/png,image/jpeg" multiple onChange={handleAdditionalImages} /></label><div className="thumbnail-row">{draft.additionalImages.map((image) => <img key={image} src={image} alt="Prévia adicional da obra" />)}</div></div>
+          <div className="additional-upload"><p>Outras fotos <span>(opcional)</span></p><label className="secondary-upload"><span>+</span> {remainingAdditionalImages === 0 ? 'Limite de 4 fotos atingido' : remainingAdditionalImages === 1 ? 'Adicionar mais 1 foto' : `Adicionar até ${remainingAdditionalImages} fotos`}<input type="file" accept="image/png,image/jpeg" multiple disabled={remainingAdditionalImages === 0} onChange={handleAdditionalImages} /></label><div className="thumbnail-row">{draft.additionalImages.map((image) => <img key={image} src={image} alt="Prévia adicional da obra" />)}</div></div>
         </div>
         {errors.mainImage && <small className="error">{errors.mainImage}</small>}
       </section>
@@ -129,7 +130,7 @@ export default function ProductAnnouncementForm() {
       </section>
 
       <div className="form-footer"><p>Você poderá editar essas informações depois.</p><button type="submit" disabled={isSaving}>{isSaving ? 'Publicando...' : 'Publicar obra'}</button></div>
-      {successMessage && <p className="success-message" role="status">{successMessage}</p>}
+      {showSuccessModal && <div className="announcement-success-backdrop" role="presentation"><section className="announcement-success-modal" role="dialog" aria-modal="true" aria-labelledby="announcement-success-title"><h2 id="announcement-success-title">Publicação concluída</h2><p>Sua obra foi publicada com sucesso! Você já pode visualizá-la nos anúncios.</p><a className="announcement-success-link" href={`/produtos/${publishedProductId}`}>Visualize seu anúncio</a></section></div>}
     </form>
   );
 }

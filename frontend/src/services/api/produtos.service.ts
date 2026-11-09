@@ -17,13 +17,16 @@ const catalogImages: Record<string, string> = {
 };
 
 export async function createProduct(draft: ProductDraft): Promise<Product> {
+  const artisanProfile = readArtisanProfile();
   const product: Product = {
     ...draft,
     id: crypto.randomUUID(),
     price: Number(draft.price),
     stock: Number(draft.stock),
     createdAt: new Date().toISOString(),
-    artisanCity: readArtisanProfile().city,
+    artisanCity: artisanProfile.city,
+    artisanName: artisanProfile.name,
+    artisanBio: artisanProfile.bio,
   };
 
   const savedProducts = readProducts();
@@ -35,9 +38,11 @@ export function readProducts(): Product[] {
   if (typeof window === 'undefined') return [];
 
   try {
+    const artisanProfile = readArtisanProfile();
     return (JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as Product[]).map((product) => ({
       ...product,
-      artisanCity: product.artisanCity || readArtisanProfile().city,
+      artisanCity: product.artisanCity || artisanProfile.city,
+      artisanName: product.artisanName || artisanProfile.name,
     }));
   } catch {
     return [];
@@ -89,4 +94,3 @@ export function updateProduct(productId: string, updates: ProductDraft, fallback
   localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProducts));
   return updatedProduct;
 }
-

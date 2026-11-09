@@ -1,9 +1,9 @@
 'use client';
 
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { readCatalogProducts, updateProductStock } from '../../services/api/produtos.service';
+import { readProducts, updateProductStock } from '../../services/api/produtos.service';
 import { Product } from '../../types/produto';
-import { demoProducts } from '../../mocks/products';
+import { readArtisanProfile } from '../../services/api/usuarios.service';
 
 const categoryLabels: Record<Product['category'], string> = {
   ceramica: 'Cerâmica', madeira: 'Madeira', textil: 'Têxtil', joalheria: 'Joalheria', outros: 'Outros', '': 'Sem categoria',
@@ -14,7 +14,10 @@ export default function PublishedProducts() {
   const [query, setQuery] = useState('');
   const [savedProductId, setSavedProductId] = useState('');
 
-  useEffect(() => { setProducts(readCatalogProducts().filter((product) => product.artisanName === 'Stefani Germanotta')); }, []);
+  useEffect(() => {
+    const artisanName = readArtisanProfile().name;
+    setProducts(readProducts().filter((product) => product.artisanName === artisanName));
+  }, []);
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('pt-BR');

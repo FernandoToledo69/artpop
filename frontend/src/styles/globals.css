@@ -165,6 +165,12 @@ button { background: var(--orange); } button:hover { background: #b74431; }
 .crop-zoom { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 12px; }
 .crop-zoom input { flex: 1; padding: 0; accent-color: var(--green); }
 .crop-modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+.announcement-success-backdrop { position: fixed; z-index: 110; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(39,37,31,.62); }
+.announcement-success-modal { width: min(100%, 440px); padding: 32px; background: var(--paper); box-shadow: 0 24px 60px rgba(39,37,31,.28); text-align: center; }
+.announcement-success-modal h2 { margin-bottom: 12px; color: var(--green); }
+.announcement-success-modal p { margin: 0 0 24px; color: var(--muted); line-height: 1.6; }
+.announcement-success-link { display: inline-block; padding: 15px 24px; background: var(--green); color: white; font-weight: 700; text-decoration: none; }
+.announcement-success-link:hover { background: #1e503e; }
 .crop-cancel { background: transparent; color: var(--green); }
 .profile-hero-initials { width: 150px; height: 150px; font-size: 38px; background: var(--orange); }
 .profile-hero-initials img { display: block; width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
