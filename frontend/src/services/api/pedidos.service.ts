@@ -33,6 +33,11 @@ export interface PaymentDetails {
 
 const PAYMENT_PROFILE_KEY = 'origem:payment-profile';
 
+export function formatCardExpiry(value: string): string {
+	const digits = value.replace(/\D/g, '').slice(0, 4);
+	return digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+}
+
 export function readOrders(): Order[] {
 	if (typeof window === 'undefined') return [];
 	try {
@@ -117,4 +122,8 @@ export function readPaymentProfile(): PaymentProfile | null {
 export function savePaymentProfile(profile: PaymentProfile): PaymentProfile {
 	localStorage.setItem(PAYMENT_PROFILE_KEY, JSON.stringify(profile));
 	return profile;
+}
+
+export function deletePaymentProfile(): void {
+	localStorage.removeItem(PAYMENT_PROFILE_KEY);
 }

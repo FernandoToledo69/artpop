@@ -402,7 +402,9 @@ button { background: var(--orange); } button:hover { background: #b74431; }
 .payment-fields button { grid-column: 1 / -1; justify-self: start; }
 .payment-actions { display: flex; align-items: center; gap: 12px; grid-column: 1 / -1; }
 .payment-actions button { margin: 0; }
-.saved-payment { display: flex; align-items: center; gap: 14px; max-width: 680px; border: 1px solid var(--green); background: #f5f8f2; padding: 16px; }
+.save-payment-option { display: flex; align-items: center; gap: 10px; grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
+.save-payment-option input { width: auto; margin: 0; }
+.saved-payment { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; max-width: 680px; border: 1px solid var(--green); background: #f5f8f2; padding: 16px; }
 .saved-payment-icon { display: grid; place-items: center; width: 40px; height: 40px; background: var(--green); color: white; font-weight: 700; }
 .saved-payment div { display: flex; flex: 1; flex-direction: column; gap: 4px; }
 .saved-payment small { color: var(--muted); font-size: 11px; }
@@ -410,7 +412,7 @@ button { background: var(--orange); } button:hover { background: #b74431; }
 .payment-security-note { color: var(--muted); font-size: 11px; margin: 20px 0 0; }
 .payment-form-section .success-message { padding: 0; margin: 18px 0 0; }
 @media (max-width: 700px) { .cart-intro { align-items: flex-start; flex-direction: column; margin: 30px 0; } .cart-layout { grid-template-columns: 1fr; gap: 22px; } .cart-items, .shipping-calculator { padding: 28px 22px; } .cart-item { grid-template-columns: 64px 1fr; gap: 14px; } .cart-item-image { width: 64px; height: 64px; } .cart-quantity { grid-column: 1 / -1; } .shipping-form { grid-template-columns: 1fr; } .shipping-form button { width: 100%; } }
-@media (max-width: 700px) { .payment-form-section { padding: 30px 22px; } .payment-methods { grid-template-columns: 1fr 1fr; } .pix-payment, .payment-placeholder { align-items: flex-start; flex-direction: column; } .pix-payment img { align-self: center; } .payment-fields { grid-template-columns: 1fr; } .payment-fields .field-wide, .payment-fields button { grid-column: auto; } .payment-fields button { width: 100%; } .payment-actions { grid-column: auto; flex-direction: column; align-items: stretch; } .payment-actions button { width: 100%; } .saved-payment { align-items: flex-start; } .saved-payment button { margin-left: auto; } }
+@media (max-width: 700px) { .payment-form-section { padding: 30px 22px; } .payment-methods { grid-template-columns: 1fr 1fr; } .pix-payment, .payment-placeholder { align-items: flex-start; flex-direction: column; } .pix-payment img { align-self: center; } .payment-fields { grid-template-columns: 1fr; } .payment-fields .field-wide, .payment-fields button { grid-column: auto; } .payment-fields button { width: 100%; } .payment-actions { grid-column: auto; flex-direction: column; align-items: stretch; } .payment-actions button { width: 100%; } .saved-payment { align-items: flex-start; } .saved-payment button { margin-left: 0; } }
 .avatar { border-radius: 4px; }
 .avatar img { width: 100%; height: 100%; border-radius: 4px; object-fit: cover; }
 .finish-purchase-button { margin-top: 20px; }
