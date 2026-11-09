@@ -30,6 +30,11 @@ const {
 } = require('../src/services/api/produtos.service.ts');
 const { addToCart, readCart } = require('../src/services/api/carrinho.service.ts');
 const { createOrder } = require('../src/services/api/pedidos.service.ts');
+const {
+  filterProductsByMunicipality,
+  municipalities,
+  sortProductsByOrder,
+} = require('../src/components/marketplace/marketplace-filters.ts');
 
 const draft = {
   title: 'Vaso Brisa do Sertão',
@@ -191,4 +196,50 @@ test('identifica o artesão dono e não permite que ele compre a própria obra',
   storage.setItem('origem:session', JSON.stringify({ ...artisan, expiresAt: Date.now() + 60_000 }));
   assert.equal(createOrder({ brand: 'Pix', last4: 'PIX' }), null);
   assert.equal(JSON.parse(storage.getItem('origem:orders') ?? '[]').length, 0);
+});
+
+test('filtra a vitrine para exibir somente obras de Caruaru', () => {
+  const products = [
+    { id: 'caruaru-1', artisanCity: 'Caruaru' },
+    { id: 'recife-1', artisanCity: 'Recife' },
+    { id: 'olinda-1', artisanCity: 'Olinda' },
+  ];
+
+  const filteredProducts = filterProductsByMunicipality(products, 'Caruaru');
+
+  assert.ok(municipalities.includes('Caruaru'));
+  assert.deepEqual(filteredProducts.map((product) => product.id), ['caruaru-1']);
+  assert.deepEqual(
+    filterProductsByMunicipality([{ id: 'jaboatao-1', artisanCity: 'Jaboatão dos   Guararapes' }], 'jaboatao dos guararapes')
+      .map((product) => product.id),
+    ['jaboatao-1'],
+  );
+  assert.deepEqual(filterProductsByMunicipality(products, 'Todos os municípios'), products);
+});
+
+test('inclui publicações recentes quando o município do perfil tem espaços ou variação de caixa', async () => {
+  storage.setItem('origem:artisan-profile', JSON.stringify({
+    name: 'Artesã de Caruaru',
+    city: '  CARUARU  ',
+  }));
+  const product = await createProduct(draft);
+  const catalogProducts = readCatalogProducts();
+
+  assert.equal(product.artisanCity, 'CARUARU');
+  assert.ok(filterProductsByMunicipality(catalogProducts, 'Caruaru').some(
+    (catalogProduct) => catalogProduct.id === product.id,
+  ));
+});
+
+test('ordena os anúncios do menor valor para o maior sem alterar a lista original', () => {
+  const products = [
+    { id: 'medium', price: 89.9 },
+    { id: 'lowest', price: 12.5 },
+    { id: 'highest', price: 320 },
+  ];
+
+  const sortedProducts = sortProductsByOrder(products, 'price-asc');
+
+  assert.deepEqual(sortedProducts.map((product) => product.id), ['lowest', 'medium', 'highest']);
+  assert.deepEqual(products.map((product) => product.id), ['medium', 'lowest', 'highest']);
 });
