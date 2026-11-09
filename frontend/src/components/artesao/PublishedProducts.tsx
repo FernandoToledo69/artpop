@@ -3,7 +3,7 @@
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { deleteProduct, readProducts, updateProductStock } from '../../services/api/produtos.service';
 import { Product } from '../../types/produto';
-import { readArtisanProfile } from '../../services/api/usuarios.service';
+import { getCurrentUser } from '../../services/api/auth.service';
 
 const categoryLabels: Record<Product['category'], string> = {
   ceramica: 'Cerâmica', madeira: 'Madeira', textil: 'Têxtil', joalheria: 'Joalheria', outros: 'Outros', '': 'Sem categoria',
@@ -16,8 +16,8 @@ export default function PublishedProducts() {
   const [productPendingDeletion, setProductPendingDeletion] = useState<Product | null>(null);
 
   useEffect(() => {
-    const artisanName = readArtisanProfile().name;
-    setProducts(readProducts().filter((product) => product.artisanName === artisanName));
+    const artisanId = getCurrentUser()?.artisanId;
+    setProducts(artisanId ? readProducts().filter((product) => product.artisanId === artisanId) : []);
   }, []);
 
   const filteredProducts = useMemo(() => {

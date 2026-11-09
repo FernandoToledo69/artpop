@@ -1,3 +1,5 @@
+import { getUserScopedStorageKey } from './user-storage';
+
 export interface Coupon {
   code: string;
   description: string;
@@ -17,12 +19,12 @@ const COUPON_STORAGE_KEY = 'origem:coupon';
 export function listCoupons(): Coupon[] { return COUPONS; }
 export function applyCoupon(code: string): Coupon | null {
   const coupon = COUPONS.find((item) => item.code === code.trim().toUpperCase()) ?? null;
-  if (coupon) localStorage.setItem(COUPON_STORAGE_KEY, JSON.stringify(coupon));
+  if (coupon) localStorage.setItem(getUserScopedStorageKey(COUPON_STORAGE_KEY), JSON.stringify(coupon));
   return coupon;
 }
 export function readAppliedCoupon(): Coupon | null {
   if (typeof window === 'undefined') return null;
-  try { return JSON.parse(localStorage.getItem(COUPON_STORAGE_KEY) ?? 'null') as Coupon | null; } catch { return null; }
+  try { return JSON.parse(localStorage.getItem(getUserScopedStorageKey(COUPON_STORAGE_KEY)) ?? 'null') as Coupon | null; } catch { return null; }
 }
-export function clearAppliedCoupon(): void { localStorage.removeItem(COUPON_STORAGE_KEY); }
+export function clearAppliedCoupon(): void { localStorage.removeItem(getUserScopedStorageKey(COUPON_STORAGE_KEY)); }
 export function calculateDiscount(subtotal: number, coupon: Coupon | null): number { return coupon ? Number((subtotal * coupon.discountPercent / 100).toFixed(2)) : 0; }

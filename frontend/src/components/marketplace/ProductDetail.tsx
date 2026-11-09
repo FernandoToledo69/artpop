@@ -3,7 +3,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { isProductOwner, readCatalogProducts } from '../../services/api/produtos.service';
 import { getCurrentUser } from '../../services/api/auth.service';
-import { readArtisanProfile } from '../../services/api/usuarios.service';
 import { Product } from '../../types/produto';
 import { demoProducts } from '../../mocks/products';
 import { addToCart } from '../../services/api/carrinho.service';
@@ -56,11 +55,10 @@ export default function ProductDetail({ productId }: { productId: string }) {
 
   if (!product) return <div className="catalog-empty"><h2>Obra não encontrada</h2><p>Este anúncio pode ter sido removido ou não está mais disponível.</p><a className="catalog-action" href="/">Voltar para a página inicial</a></div>;
 
-  const profile = readArtisanProfile();
   const currentUser = getCurrentUser();
   const isOwner = isProductOwner(product, currentUser);
-  const artisanName = product.artisanName ?? (product.id.startsWith('demo-') ? `Ateliê ${product.artisanCity}` : profile.name);
-  const story = product.artisanBio ?? stories[product.artisanCity] ?? profile.bio;
+  const artisanName = product.artisanName ?? `Ateliê ${product.artisanCity}`;
+  const story = product.artisanBio ?? stories[product.artisanCity] ?? 'Conheça as técnicas e a história por trás desta criação autoral.';
   const galleryImages = [product.mainImage, ...product.additionalImages].filter(Boolean);
   const selectedImage = galleryImages[activeImage] ?? '';
 

@@ -2,7 +2,8 @@
 
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { demoProducts } from '../marketplace/MarketplaceProducts';
-import { readCatalogProducts, updateProduct } from '../../services/api/produtos.service';
+import { getCurrentUser } from '../../services/api/auth.service';
+import { isProductOwner, readCatalogProducts, updateProduct } from '../../services/api/produtos.service';
 import { Product, ProductDraft } from '../../types/produto';
 
 function fileToDataUrl(file: File): Promise<string> {
@@ -21,7 +22,9 @@ export default function ProductEditForm({ productId }: { productId: string }) {
 	const [successMessage, setSuccessMessage] = useState('');
 
 	useEffect(() => {
-		const foundProduct = readCatalogProducts().find((item) => item.id === productId) ?? null;
+		const user = getCurrentUser();
+		const candidate = readCatalogProducts().find((item) => item.id === productId) ?? null;
+		const foundProduct = candidate && isProductOwner(candidate, user) ? candidate : null;
 		setProduct(foundProduct);
 		if (foundProduct) setDraft({ ...foundProduct, price: String(foundProduct.price), stock: String(foundProduct.stock) });
 	}, [productId]);
@@ -42,6 +45,10 @@ export default function ProductEditForm({ productId }: { productId: string }) {
 	async function handleSubmit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		if (!draft || !product) return;
+		if (!isProductOwner(product, getCurrentUser())) {
+			setError('Você não tem permissão para editar esta obra.');
+			return;
+		}
 		if (draft.additionalImages.length > 4) {
 			setError('Adicione no máximo 4 fotos extras.');
 			return;

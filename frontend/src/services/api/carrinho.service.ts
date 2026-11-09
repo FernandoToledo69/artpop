@@ -1,6 +1,7 @@
 import type { AuthUser } from '../../types/auth';
 import { Product } from '../../types/produto';
 import { isProductOwner, readCatalogProducts } from './produtos.service';
+import { getUserScopedStorageKey } from './user-storage';
 
 const CART_STORAGE_KEY = 'origem:cart';
 const SHIPPING_SELECTION_KEY = 'origem:shipping-selection';
@@ -9,6 +10,7 @@ export interface CartItem {
 	id: string;
 	title: string;
 	artisanName: string;
+	artisanId?: string;
 	artisanCity: string;
 	price: number;
 	quantity: number;
@@ -25,7 +27,7 @@ export function readCart(): CartItem[] {
 	if (typeof window === 'undefined') return [];
 
 	try {
-		const savedItems = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) ?? '[]') as CartItem[];
+		const savedItems = JSON.parse(localStorage.getItem(getUserScopedStorageKey(CART_STORAGE_KEY)) ?? '[]') as CartItem[];
 		return savedItems.filter((item) => item.quantity > 0);
 	} catch {
 		return [];
@@ -33,14 +35,14 @@ export function readCart(): CartItem[] {
 }
 
 function saveCart(items: CartItem[]): CartItem[] {
-	localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+	localStorage.setItem(getUserScopedStorageKey(CART_STORAGE_KEY), JSON.stringify(items));
 	window.dispatchEvent(new Event('cart-updated'));
 	return items;
 }
 
 export function clearCart(): void {
-	localStorage.removeItem(CART_STORAGE_KEY);
-	localStorage.removeItem(SHIPPING_SELECTION_KEY);
+	localStorage.removeItem(getUserScopedStorageKey(CART_STORAGE_KEY));
+	localStorage.removeItem(getUserScopedStorageKey(SHIPPING_SELECTION_KEY));
 	window.dispatchEvent(new Event('cart-updated'));
 }
 
@@ -59,6 +61,7 @@ export function addToCart(product: Product, currentUser: AuthUser | null, quanti
 		id: currentProduct.id,
 		title: currentProduct.title,
 		artisanName: getArtisanName(currentProduct),
+		artisanId: currentProduct.artisanId,
 		artisanCity: currentProduct.artisanCity,
 		price: currentProduct.price,
 		quantity: Math.min(quantityToAdd, currentProduct.stock),
@@ -97,11 +100,11 @@ export function formatPostalCode(value: string): string {
 	return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
 }
 
-export function saveShippingSelection(option: ShippingOption): void { localStorage.setItem(SHIPPING_SELECTION_KEY, JSON.stringify(option)); }
-export function clearShippingSelection(): void { localStorage.removeItem(SHIPPING_SELECTION_KEY); }
+export function saveShippingSelection(option: ShippingOption): void { localStorage.setItem(getUserScopedStorageKey(SHIPPING_SELECTION_KEY), JSON.stringify(option)); }
+export function clearShippingSelection(): void { localStorage.removeItem(getUserScopedStorageKey(SHIPPING_SELECTION_KEY)); }
 export function readShippingSelection(): ShippingOption | null {
 	if (typeof window === 'undefined') return null;
-	try { return JSON.parse(localStorage.getItem(SHIPPING_SELECTION_KEY) ?? 'null') as ShippingOption | null; } catch { return null; }
+	try { return JSON.parse(localStorage.getItem(getUserScopedStorageKey(SHIPPING_SELECTION_KEY)) ?? 'null') as ShippingOption | null; } catch { return null; }
 }
 
 export function calculateShippingTotal(subtotal: number, option: ShippingOption): number {

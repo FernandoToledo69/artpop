@@ -55,7 +55,7 @@ let storage;
 
 test.beforeEach(() => {
   const values = new Map([
-    ['origem:artisan-profile', JSON.stringify({ city: 'Recife' })],
+    ['origem:artisan-profile:guest', JSON.stringify({ name: 'Stefani Germanotta', email: 'ana.lima@email.com', city: 'Recife' })],
   ]);
   storage = {
     getItem(key) {
@@ -66,6 +66,12 @@ test.beforeEach(() => {
     },
     removeItem(key) {
       values.delete(key);
+    },
+    get length() {
+      return values.size;
+    },
+    key(index) {
+      return Array.from(values.keys())[index] ?? null;
     },
   };
   global.window = { dispatchEvent() {} };
@@ -133,7 +139,7 @@ test('publica e disponibiliza no catálogo a obra com suas quatro imagens', asyn
   assert.equal(storage.getItem('origem:products') !== null, true);
 });
 
-test('associa ao perfil atual as obras antigas que não tinham artesão gravado', () => {
+test('não associa a uma conta atual dados pessoais de obras antigas sem artesão identificado', () => {
   storage.setItem('origem:products', JSON.stringify([{
     ...draft,
     id: 'legacy-product',
@@ -145,7 +151,8 @@ test('associa ao perfil atual as obras antigas que não tinham artesão gravado'
 
   const legacyProduct = readProducts().find((product) => product.id === 'legacy-product');
 
-  assert.equal(legacyProduct.artisanName, 'Stefani Germanotta');
+  assert.equal(legacyProduct.artisanName, 'Artesão');
+  assert.equal(legacyProduct.artisanCity, 'Recife');
 });
 
 test('exclui permanentemente a obra e suas informações sem afetar outras publicações', async () => {
@@ -179,7 +186,7 @@ test('salva estoque zero e impede adicionar a obra esgotada ao carrinho', async 
 
   storage.setItem('origem:session', JSON.stringify({ id: 'buyer-1', expiresAt: Date.now() + 60_000 }));
   assert.equal(createOrder({ brand: 'Pix', last4: 'PIX' }), null);
-  assert.equal(JSON.parse(storage.getItem('origem:orders') ?? '[]').length, 0);
+  assert.equal(JSON.parse(storage.getItem('origem:orders:buyer-1') ?? '[]').length, 0);
 });
 
 test('identifica o artesão dono e não permite que ele compre a própria obra', async () => {
@@ -189,13 +196,14 @@ test('identifica o artesão dono e não permite que ele compre a própria obra',
 
   assert.equal(isProductOwner(product, artisan), true);
   assert.equal(isProductOwner(product, otherArtisan), false);
+  assert.equal(isProductOwner({ ...product, artisanId: undefined }, artisan), false);
   assert.equal(isProductOwner(product, { ...artisan, role: 'buyer' }), false);
   assert.deepEqual(addToCart(product, artisan), []);
 
   addToCart(product, null);
   storage.setItem('origem:session', JSON.stringify({ ...artisan, expiresAt: Date.now() + 60_000 }));
   assert.equal(createOrder({ brand: 'Pix', last4: 'PIX' }), null);
-  assert.equal(JSON.parse(storage.getItem('origem:orders') ?? '[]').length, 0);
+  assert.equal(JSON.parse(storage.getItem('origem:orders:user-123') ?? '[]').length, 0);
 });
 
 test('filtra a vitrine para exibir somente obras de Caruaru', () => {
@@ -218,7 +226,7 @@ test('filtra a vitrine para exibir somente obras de Caruaru', () => {
 });
 
 test('inclui publicações recentes quando o município do perfil tem espaços ou variação de caixa', async () => {
-  storage.setItem('origem:artisan-profile', JSON.stringify({
+  storage.setItem('origem:artisan-profile:guest', JSON.stringify({
     name: 'Artesã de Caruaru',
     city: '  CARUARU  ',
   }));

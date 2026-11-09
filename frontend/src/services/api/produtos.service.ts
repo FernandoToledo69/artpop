@@ -40,11 +40,10 @@ export function readProducts(): Product[] {
   if (typeof window === 'undefined') return [];
 
   try {
-    const artisanProfile = readArtisanProfile();
     return (JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as Product[]).map((product) => ({
       ...product,
-      artisanCity: product.artisanCity || artisanProfile.city,
-      artisanName: product.artisanName || artisanProfile.name,
+      artisanCity: product.artisanCity || '',
+      artisanName: product.artisanName || 'Artesão',
     }));
   } catch {
     return [];
@@ -62,8 +61,7 @@ export function readCatalogProducts(): Product[] {
 
 export function isProductOwner(product: Product, user: AuthUser | null): boolean {
   if (user?.role !== 'artisan') return false;
-  if (product.artisanId) return product.artisanId === user.artisanId;
-  return product.artisanName === user.name;
+  return Boolean(product.artisanId && product.artisanId === user.artisanId);
 }
 
 export function deleteProduct(productId: string): void {

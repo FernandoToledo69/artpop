@@ -2,6 +2,7 @@ import { CartItem, readCart, readShippingSelection } from './carrinho.service';
 import { isProductOwner, readCatalogProducts, updateProductStock } from './produtos.service';
 import { getCurrentUser } from './auth.service';
 import { readAppliedCoupon, calculateDiscount } from './cupons.service';
+import { getUserScopedStorageKey, readAllUserScopedStorageEntries } from './user-storage';
 
 export type OrderStatus = 'Pendente' | 'Enviado' | 'Concluído' | 'Cancelado';
 
@@ -41,10 +42,55 @@ export function formatCardExpiry(value: string): string {
 export function readOrders(): Order[] {
 	if (typeof window === 'undefined') return [];
 	try {
-		return JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY) ?? '[]') as Order[];
+		return JSON.parse(localStorage.getItem(getUserScopedStorageKey(ORDERS_STORAGE_KEY)) ?? '[]') as Order[];
 	} catch {
 		return [];
 	}
+}
+
+export function readAllOrders(): Order[] {
+	return readAllUserScopedStorageEntries<Order[]>(ORDERS_STORAGE_KEY).flatMap(({ value }) => Array.isArray(value) ? value : []);
+}
+
+export function updateOrderStatus(orderId: string, status: OrderStatus): Order[] {
+	if (typeof window === 'undefined') return [];
+	const prefix = `${ORDERS_STORAGE_KEY}:`;
+	for (let index = 0; index < localStorage.length; index += 1) {
+		const key = localStorage.key(index);
+		if (!key?.startsWith(prefix)) continue;
+		try {
+			const orders = JSON.parse(localStorage.getItem(key) ?? '[]') as Order[];
+			const updatedOrders = orders.map((order) => order.id === orderId ? { ...order, status } : order);
+			if (updatedOrders.some((order, orderIndex) => order !== orders[orderIndex])) {
+				localStorage.setItem(key, JSON.stringify(updatedOrders));
+			}
+		} catch {
+			continue;
+		}
+	}
+	return readOrders();
+}
+
+export function updateArtisanOrderStatus(orderId: string, status: OrderStatus, artisanId: string): Order[] {
+	if (typeof window === 'undefined') return [];
+	const prefix = `${ORDERS_STORAGE_KEY}:`;
+	for (let index = 0; index < localStorage.length; index += 1) {
+		const key = localStorage.key(index);
+		if (!key?.startsWith(prefix)) continue;
+		try {
+			const orders = JSON.parse(localStorage.getItem(key) ?? '[]') as Order[];
+			const updatedOrders = orders.map((order) => order.id === orderId
+				&& order.items.some((item) => item.artisanId === artisanId)
+				? { ...order, status }
+				: order);
+			if (updatedOrders.some((order, orderIndex) => order !== orders[orderIndex])) {
+				localStorage.setItem(key, JSON.stringify(updatedOrders));
+			}
+		} catch {
+			continue;
+		}
+	}
+	return readOrders();
 }
 
 export function createOrder(payment: PaymentProfile): Order | null {
@@ -62,15 +108,15 @@ export function createOrder(payment: PaymentProfile): Order | null {
 	const discount = calculateDiscount(subtotal, readAppliedCoupon());
 	const order: Order = { id: `PED-${Date.now().toString().slice(-6)}`, createdAt: new Date().toISOString(), items, total: subtotal - discount + (shipping?.price ?? 0), discount, shipping: shipping ? { name: shipping.name, price: shipping.price, deliveryTime: shipping.deliveryTime } : undefined, status: 'Pendente', payment: { brand: payment.brand, last4: payment.last4 } };
 	items.forEach((item) => updateProductStock(item.id, Math.max(0, item.stock - item.quantity)));
-	localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify([order, ...readOrders()]));
-	localStorage.setItem('origem:cart', '[]');
+	localStorage.setItem(getUserScopedStorageKey(ORDERS_STORAGE_KEY), JSON.stringify([order, ...readOrders()]));
+	localStorage.setItem(getUserScopedStorageKey('origem:cart'), '[]');
 	window.dispatchEvent(new Event('cart-updated'));
 	return order;
 }
 
 export function cancelOrder(orderId: string): Order[] {
 	const orders = readOrders().map((order) => order.id === orderId ? { ...order, status: 'Cancelado' as const } : order);
-	localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+	localStorage.setItem(getUserScopedStorageKey(ORDERS_STORAGE_KEY), JSON.stringify(orders));
 	return orders;
 }
 
@@ -113,17 +159,17 @@ export async function tokenizeCard(details: PaymentDetails): Promise<PaymentProf
 export function readPaymentProfile(): PaymentProfile | null {
 	if (typeof window === 'undefined') return null;
 	try {
-		return JSON.parse(localStorage.getItem(PAYMENT_PROFILE_KEY) ?? 'null') as PaymentProfile | null;
+		return JSON.parse(localStorage.getItem(getUserScopedStorageKey(PAYMENT_PROFILE_KEY)) ?? 'null') as PaymentProfile | null;
 	} catch {
 		return null;
 	}
 }
 
 export function savePaymentProfile(profile: PaymentProfile): PaymentProfile {
-	localStorage.setItem(PAYMENT_PROFILE_KEY, JSON.stringify(profile));
+	localStorage.setItem(getUserScopedStorageKey(PAYMENT_PROFILE_KEY), JSON.stringify(profile));
 	return profile;
 }
 
 export function deletePaymentProfile(): void {
-	localStorage.removeItem(PAYMENT_PROFILE_KEY);
+	localStorage.removeItem(getUserScopedStorageKey(PAYMENT_PROFILE_KEY));
 }

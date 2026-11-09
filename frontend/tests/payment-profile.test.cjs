@@ -23,7 +23,8 @@ const {
   tokenizeCard,
 } = require('../src/services/api/pedidos.service.ts');
 
-const PAYMENT_PROFILE_KEY = 'origem:payment-profile';
+const PAYMENT_PROFILE_KEY = 'origem:payment-profile:guest';
+const SESSION_STORAGE_KEY = 'origem:session';
 
 let storage;
 
@@ -43,6 +44,16 @@ test.beforeEach(() => {
   global.window = {};
   global.localStorage = storage;
 });
+
+function setCurrentUser(id) {
+  storage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+    id,
+    name: id,
+    email: `${id}@example.test`,
+    role: 'buyer',
+    expiresAt: Date.now() + 60_000,
+  }));
+}
 
 test('valida o cartão, salva o token no perfil e não persiste número ou código de segurança', async () => {
   const paymentProfile = await tokenizeCard({
@@ -111,4 +122,21 @@ test('exclui o cartão salvo do perfil', () => {
 
   assert.equal(readPaymentProfile(), null);
   assert.equal(storage.getItem(PAYMENT_PROFILE_KEY), null);
+});
+
+test('não compartilha cartão salvo entre contas', () => {
+  setCurrentUser('buyer-1');
+  const paymentProfile = {
+    token: 'tok_buyer-card',
+    brand: 'Visa',
+    last4: '1111',
+    updatedAt: '2026-11-09T12:00:00.000Z',
+  };
+  savePaymentProfile(paymentProfile);
+
+  setCurrentUser('buyer-2');
+  assert.equal(readPaymentProfile(), null);
+
+  setCurrentUser('buyer-1');
+  assert.deepEqual(readPaymentProfile(), paymentProfile);
 });

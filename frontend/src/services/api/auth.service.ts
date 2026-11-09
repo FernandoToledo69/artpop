@@ -1,5 +1,4 @@
 import { AccountRecord, AuthUser, UserRole } from '../../types/auth';
-import { clearCart } from './carrinho.service';
 
 const ACCOUNTS_KEY = 'origem:accounts';
 const SESSION_KEY = 'origem:session';
@@ -20,6 +19,13 @@ async function hashValue(value: string): Promise<string> {
 
 function normalizeEmail(email: string): string { return email.trim().toLowerCase(); }
 function normalizeDigits(value: string): string { return value.replace(/\D/g, ''); }
+export function formatCpf(value: string): string {
+  const digits = normalizeDigits(value).slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}
 function maskPhone(phone: string): string { const digits = normalizeDigits(phone); return digits.length < 4 ? '' : `••••${digits.slice(-4)}`; }
 function isValidCpf(cpf: string): boolean {
   const digits = normalizeDigits(cpf);
@@ -93,7 +99,6 @@ export async function register(name: string, email: string, password: string, ph
 
 export function logout(): void {
   localStorage.removeItem(SESSION_KEY);
-  clearCart();
-  localStorage.removeItem('origem:payment-profile');
   window.dispatchEvent(new Event('auth-updated'));
+  window.dispatchEvent(new Event('cart-updated'));
 }
