@@ -25,7 +25,7 @@ export async function createProduct(draft: ProductDraft, artisanId?: string): Pr
     price: Number(draft.price),
     stock: Number(draft.stock),
     createdAt: new Date().toISOString(),
-    artisanCity: artisanProfile.city,
+    artisanCity: artisanProfile.city.trim(),
     artisanId,
     artisanName: artisanProfile.name,
     artisanBio: artisanProfile.bio,
