@@ -1,7 +1,7 @@
 'use client';
 
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
-import { readArtisanProfile, updateArtisanProfile } from '../../services/api/usuarios.service';
+import { formatPhone, readArtisanProfile, updateArtisanProfile } from '../../services/api/usuarios.service';
 import { ArtisanProfile } from '../../types/usuario';
 import { getCurrentUser } from '../../services/api/auth.service';
 
@@ -78,7 +78,7 @@ export default function ArtisanProfileForm() {
       <div className="field-grid">
         <label className="field field-wide">Nome completo<input value={profile.name} onChange={(event) => updateField('name', event.target.value)} /></label>
         <label className="field">E-mail<input type="email" value={profile.email} disabled /></label>
-        <label className="field">Telefone<input value={profile.phone} onChange={(event) => updateField('phone', event.target.value)} placeholder="(00) 00000-0000" /></label>
+        <label className="field">Telefone<input type="tel" inputMode="numeric" autoComplete="tel" maxLength={14} value={profile.phone} onChange={(event) => updateField('phone', formatPhone(event.target.value))} placeholder="(00)00000-0000" /></label>
         <label className="field field-wide">Endereço<input value={profile.address} onChange={(event) => updateField('address', event.target.value)} placeholder="Rua, número e complemento" /></label>
         <label className="field">Cidade<input value={profile.city} onChange={(event) => updateField('city', event.target.value)} /></label>
         <label className="field">Estado<input maxLength={2} value={profile.state} onChange={(event) => updateField('state', event.target.value.toUpperCase())} placeholder="UF" /></label>

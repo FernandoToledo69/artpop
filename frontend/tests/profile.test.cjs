@@ -16,6 +16,7 @@ require.extensions['.ts'] = (module, filename) => {
 };
 
 const {
+  formatPhone,
   readArtisanProfile,
   updateArtisanProfile,
 } = require('../src/services/api/usuarios.service.ts');
@@ -39,6 +40,14 @@ test.beforeEach(() => {
   };
   global.window = {};
   global.localStorage = storage;
+});
+
+test('formata telefones móveis e fixos nos padrões aceitos', () => {
+  assert.equal(formatPhone('81999991234'), '(81)99999-1234');
+  assert.equal(formatPhone('(81) 99999-1234'), '(81)99999-1234');
+  assert.equal(formatPhone('8133331234'), '(81)3333-1234');
+  assert.equal(formatPhone('(81)3333-1234'), '(81)3333-1234');
+  assert.equal(formatPhone('81a3333-1234'), '(81)3333-1234');
 });
 
 test('salva e recupera os dados pessoais e a nova foto de perfil', () => {
