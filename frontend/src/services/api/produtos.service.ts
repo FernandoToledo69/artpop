@@ -1,4 +1,5 @@
 import { Product, ProductDraft } from '../../types/produto';
+import type { AuthUser } from '../../types/auth';
 import { demoProducts } from '../../mocks/products';
 import { readArtisanProfile } from './usuarios.service';
 
@@ -16,7 +17,7 @@ const catalogImages: Record<string, string> = {
   'demo-8': 'https://letseatit.com.br/cdn/shop/files/WhatsAppImage2026-02-10at15.13.49.jpg?v=1770747692',
 };
 
-export async function createProduct(draft: ProductDraft): Promise<Product> {
+export async function createProduct(draft: ProductDraft, artisanId?: string): Promise<Product> {
   const artisanProfile = readArtisanProfile();
   const product: Product = {
     ...draft,
@@ -25,6 +26,7 @@ export async function createProduct(draft: ProductDraft): Promise<Product> {
     stock: Number(draft.stock),
     createdAt: new Date().toISOString(),
     artisanCity: artisanProfile.city,
+    artisanId,
     artisanName: artisanProfile.name,
     artisanBio: artisanProfile.bio,
   };
@@ -56,6 +58,17 @@ export function readCatalogProducts(): Product[] {
     ...product,
     mainImage: product.mainImage || catalogImages[product.id] || '',
   }));
+}
+
+export function isProductOwner(product: Product, user: AuthUser | null): boolean {
+  if (user?.role !== 'artisan') return false;
+  if (product.artisanId) return product.artisanId === user.artisanId;
+  return product.artisanName === user.name;
+}
+
+export function deleteProduct(productId: string): void {
+  const remainingProducts = readProducts().filter((product) => product.id !== productId);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(remainingProducts));
 }
 
 export function updateProductStock(productId: string, stock: number, fallbackProduct?: Product): Product | null {

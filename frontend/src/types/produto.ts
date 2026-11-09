@@ -17,6 +17,7 @@ export interface Product extends Omit<ProductDraft, 'price' | 'stock'> {
   stock: number;
   createdAt: string;
   artisanCity: string;
+  artisanId?: string;
   artisanName?: string;
   artisanBio?: string;
 }

@@ -171,6 +171,14 @@ button { background: var(--orange); } button:hover { background: #b74431; }
 .announcement-success-modal p { margin: 0 0 24px; color: var(--muted); line-height: 1.6; }
 .announcement-success-link { display: inline-block; padding: 15px 24px; background: var(--green); color: white; font-weight: 700; text-decoration: none; }
 .announcement-success-link:hover { background: #1e503e; }
+.product-row-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+.delete-product-link { padding: 0; background: none; color: #bd4d3e; font-size: 11px; font-weight: 700; text-decoration: underline; }
+.delete-product-link:hover { background: none; color: #963b30; }
+.product-delete-modal h2 { color: #bd4d3e; }
+.product-delete-actions { display: flex; justify-content: center; gap: 12px; }
+.product-delete-actions button { min-width: 100px; }
+.product-delete-actions .product-delete-cancel { background: transparent; color: var(--green); border: 1px solid var(--green); }
+.product-delete-actions .product-delete-cancel:hover { background: #e3eee7; }
 .crop-cancel { background: transparent; color: var(--green); }
 .profile-hero-initials { width: 150px; height: 150px; font-size: 38px; background: var(--orange); }
 .profile-hero-initials img { display: block; width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
@@ -206,6 +214,9 @@ button { background: var(--orange); } button:hover { background: #b74431; }
 .marketplace-category { color: var(--orange); font-size: 10px; font-weight: 700; letter-spacing: 1px; margin: 0 0 8px; text-transform: uppercase; }
 .marketplace-card h3 { margin: 0 0 8px; font-size: 17px; }
 .marketplace-city { color: var(--muted); font-size: 12px; margin: 0 0 14px; }
+.marketplace-stock-unavailable { display: inline-flex; align-items: center; padding: 5px 9px; border-radius: 999px; background: #fbe5e1; color: #9c392e; font-weight: 700; }
+.marketplace-card:has(.marketplace-stock-unavailable) .marketplace-image { background: #e5e7eb; }
+.marketplace-card:has(.marketplace-stock-unavailable) .marketplace-image img { filter: grayscale(1); opacity: .58; }
 .marketplace-card-body strong { color: var(--green); font-size: 14px; }
 .applause-hero { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 330px; margin: 34px 0 48px; padding: 48px 58px; overflow: hidden; position: relative; background: var(--mustard); color: var(--ink); }
 .applause-hero::after { content: ''; position: absolute; width: 310px; height: 310px; right: 110px; bottom: -220px; border: 1px solid rgba(255,249,236,.35); transform: rotate(45deg); }
@@ -267,6 +278,8 @@ button { background: var(--orange); } button:hover { background: #b74431; }
 .product-gallery button { width: 72px; height: 72px; flex: 0 0 auto; padding: 0; border: 2px solid transparent; background: #eee8d9; }
 .product-gallery button.active { border-color: var(--orange); }
 .product-gallery img { width: 100%; height: 100%; object-fit: cover; }
+.product-detail-visual.is-sold-out .marketplace-image { background: #e5e7eb; }
+.product-detail-visual.is-sold-out .marketplace-image img, .product-detail-visual.is-sold-out .product-gallery img { filter: grayscale(1); opacity: .58; }
 .product-detail-copy { padding: 18px 0; }
 .product-detail-copy h1 { color: var(--green); font-size: clamp(38px, 5vw, 60px); margin: 10px 0 20px; }
 .product-detail-description { color: var(--muted); line-height: 1.8; max-width: 460px; }
@@ -278,6 +291,9 @@ button { background: var(--orange); } button:hover { background: #b74431; }
 .product-detail > .catalog-section .marketplace-card .product-image img { object-fit: contain; }
 .product-detail > .catalog-section .marketplace-card .marketplace-card-body { padding-left: 10px; padding-right: 10px; }
 .product-stock { color: var(--green); font-size: 13px; font-weight: 700; margin: 8px 0 24px; }
+.product-stock-unavailable { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #fbe5e1; color: #9c392e !important; }
+.owner-edit-link { display: inline-block; width: fit-content; padding: 15px 24px; box-sizing: border-box; background: var(--orange); color: white; text-align: center; text-decoration: none; }
+.owner-edit-link:hover { background: #b74431; }
 .payment-box { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 18px 0; margin-bottom: 22px; }
 .payment-box h2 { color: var(--green); font-size: 16px; }
 .payment-box p { color: var(--muted); font-size: 13px; margin: 7px 0 0; }

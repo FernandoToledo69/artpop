@@ -55,6 +55,7 @@ export default function PaymentForm() {
     }
     const payment: PaymentProfile = savedCard ?? { token: `tok_${paymentMethod}_${Date.now()}`, brand: paymentMethod === 'pix' ? 'Pix' : 'Cartão', last4: paymentMethod === 'pix' ? 'PIX' : '0000', updatedAt: new Date().toISOString() };
     if (createOrder(payment)) setOrderCreated(true);
+    else setError('O estoque de uma ou mais obras foi atualizado. Revise seu carrinho antes de continuar.');
   }
 
   const pixKey = 'pagamentos@artpop.local';

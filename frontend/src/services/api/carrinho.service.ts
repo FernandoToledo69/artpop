@@ -1,4 +1,6 @@
+import type { AuthUser } from '../../types/auth';
 import { Product } from '../../types/produto';
+import { isProductOwner, readCatalogProducts } from './produtos.service';
 
 const CART_STORAGE_KEY = 'origem:cart';
 const SHIPPING_SELECTION_KEY = 'origem:shipping-selection';
@@ -42,25 +44,27 @@ export function clearCart(): void {
 	window.dispatchEvent(new Event('cart-updated'));
 }
 
-export function addToCart(product: Product, quantityToAdd: number = 1): CartItem[] {
+export function addToCart(product: Product, currentUser: AuthUser | null, quantityToAdd: number = 1): CartItem[] {
 	const items = readCart();
-	const existingItem = items.find((item) => item.id === product.id);
+	const currentProduct = readCatalogProducts().find((item) => item.id === product.id);
+	if (!currentProduct || isProductOwner(currentProduct, currentUser) || currentProduct.stock <= 0 || quantityToAdd <= 0) return items;
+	const existingItem = items.find((item) => item.id === currentProduct.id);
 
 	if (existingItem) {
-		existingItem.quantity = Math.min(existingItem.quantity + quantityToAdd, product.stock);
+		existingItem.quantity = Math.min(existingItem.quantity + quantityToAdd, currentProduct.stock);
 		return saveCart([...items]);
 	}
 
 	return saveCart([...items, {
-		id: product.id,
-		title: product.title,
-		artisanName: getArtisanName(product),
-		artisanCity: product.artisanCity,
-		price: product.price,
-		quantity: Math.min(quantityToAdd, product.stock),
-		stock: product.stock,
-		category: product.category,
-		mainImage: product.mainImage,
+		id: currentProduct.id,
+		title: currentProduct.title,
+		artisanName: getArtisanName(currentProduct),
+		artisanCity: currentProduct.artisanCity,
+		price: currentProduct.price,
+		quantity: Math.min(quantityToAdd, currentProduct.stock),
+		stock: currentProduct.stock,
+		category: currentProduct.category,
+		mainImage: currentProduct.mainImage,
 	}]);
 }
 

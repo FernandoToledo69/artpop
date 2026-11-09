@@ -2,6 +2,7 @@
 
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { createProduct } from '../../services/api/produtos.service';
+import { getCurrentUser } from '../../services/api/auth.service';
 import { ProductDraft } from '../../types/produto';
 import { appendAdditionalImages, MAX_ADDITIONAL_IMAGES, selectAdditionalImageFiles, validateProductDraft } from './product-announcement';
 
@@ -69,7 +70,7 @@ export default function ProductAnnouncementForm() {
     if (!validate()) return;
 
     setIsSaving(true);
-    const product = await createProduct(draft);
+    const product = await createProduct(draft, getCurrentUser()?.artisanId);
     setDraft(initialDraft);
     setErrors({});
     setPublishedProductId(product.id);

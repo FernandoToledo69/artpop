@@ -22,9 +22,14 @@ const {
 } = require('../src/components/forms/product-announcement.ts');
 const {
   createProduct,
+  deleteProduct,
+  isProductOwner,
   readCatalogProducts,
   readProducts,
+  updateProductStock,
 } = require('../src/services/api/produtos.service.ts');
+const { addToCart, readCart } = require('../src/services/api/carrinho.service.ts');
+const { createOrder } = require('../src/services/api/pedidos.service.ts');
 
 const draft = {
   title: 'Vaso Brisa do Sertão',
@@ -58,7 +63,7 @@ test.beforeEach(() => {
       values.delete(key);
     },
   };
-  global.window = {};
+  global.window = { dispatchEvent() {} };
   global.localStorage = storage;
 });
 
@@ -136,4 +141,54 @@ test('associa ao perfil atual as obras antigas que não tinham artesão gravado'
   const legacyProduct = readProducts().find((product) => product.id === 'legacy-product');
 
   assert.equal(legacyProduct.artisanName, 'Stefani Germanotta');
+});
+
+test('exclui permanentemente a obra e suas informações sem afetar outras publicações', async () => {
+  const productToDelete = await createProduct(draft);
+  const productToKeep = await createProduct({ ...draft, title: 'Outra obra' });
+
+  deleteProduct(productToDelete.id);
+
+  assert.equal(readProducts().some((product) => product.id === productToDelete.id), false);
+  assert.equal(readCatalogProducts().some((product) => product.id === productToDelete.id), false);
+  assert.equal(readProducts().some((product) => product.id === productToKeep.id), true);
+
+  const persistedProducts = JSON.parse(storage.getItem('origem:products'));
+  assert.equal(persistedProducts.some((product) => product.id === productToDelete.id), false);
+  assert.equal(persistedProducts.length, 1);
+});
+
+test('salva estoque zero e impede adicionar a obra esgotada ao carrinho', async () => {
+  const product = await createProduct(draft, 'artisan-123');
+
+  addToCart(product, null);
+  const updatedProduct = updateProductStock(product.id, 0);
+  const catalogProduct = readCatalogProducts().find((item) => item.id === product.id);
+  const cartAfterAttempt = addToCart(product, null);
+
+  assert.equal(updatedProduct.stock, 0);
+  assert.equal(catalogProduct.stock, 0);
+  assert.equal(JSON.parse(storage.getItem('origem:products'))[0].stock, 0);
+  assert.equal(cartAfterAttempt[0].quantity, 1);
+  assert.equal(readCart()[0].quantity, 1);
+
+  storage.setItem('origem:session', JSON.stringify({ id: 'buyer-1', expiresAt: Date.now() + 60_000 }));
+  assert.equal(createOrder({ brand: 'Pix', last4: 'PIX' }), null);
+  assert.equal(JSON.parse(storage.getItem('origem:orders') ?? '[]').length, 0);
+});
+
+test('identifica o artesão dono e não permite que ele compre a própria obra', async () => {
+  const product = await createProduct(draft, 'artisan-123');
+  const artisan = { id: 'user-123', artisanId: 'artisan-123', name: 'Stefani Germanotta', role: 'artisan' };
+  const otherArtisan = { ...artisan, id: 'user-456', artisanId: 'artisan-456', name: 'Outra pessoa' };
+
+  assert.equal(isProductOwner(product, artisan), true);
+  assert.equal(isProductOwner(product, otherArtisan), false);
+  assert.equal(isProductOwner(product, { ...artisan, role: 'buyer' }), false);
+  assert.deepEqual(addToCart(product, artisan), []);
+
+  addToCart(product, null);
+  storage.setItem('origem:session', JSON.stringify({ ...artisan, expiresAt: Date.now() + 60_000 }));
+  assert.equal(createOrder({ brand: 'Pix', last4: 'PIX' }), null);
+  assert.equal(JSON.parse(storage.getItem('origem:orders') ?? '[]').length, 0);
 });

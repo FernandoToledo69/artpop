@@ -1,5 +1,5 @@
 import { CartItem, readCart, readShippingSelection } from './carrinho.service';
-import { updateProductStock } from './produtos.service';
+import { isProductOwner, readCatalogProducts, updateProductStock } from './produtos.service';
 import { getCurrentUser } from './auth.service';
 import { readAppliedCoupon, calculateDiscount } from './cupons.service';
 
@@ -43,9 +43,15 @@ export function readOrders(): Order[] {
 }
 
 export function createOrder(payment: PaymentProfile): Order | null {
-	if (!getCurrentUser()) return null;
+	const currentUser = getCurrentUser();
+	if (!currentUser) return null;
 	const items = readCart();
 	if (items.length === 0) return null;
+	const availableProducts = readCatalogProducts();
+	if (items.some((item) => {
+		const product = availableProducts.find((availableProduct) => availableProduct.id === item.id);
+		return !product || isProductOwner(product, currentUser) || product.stock < item.quantity;
+	})) return null;
 	const shipping = readShippingSelection();
 	const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
 	const discount = calculateDiscount(subtotal, readAppliedCoupon());

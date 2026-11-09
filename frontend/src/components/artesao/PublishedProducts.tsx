@@ -1,7 +1,7 @@
 'use client';
 
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { readProducts, updateProductStock } from '../../services/api/produtos.service';
+import { deleteProduct, readProducts, updateProductStock } from '../../services/api/produtos.service';
 import { Product } from '../../types/produto';
 import { readArtisanProfile } from '../../services/api/usuarios.service';
 
@@ -13,6 +13,7 @@ export default function PublishedProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [query, setQuery] = useState('');
   const [savedProductId, setSavedProductId] = useState('');
+  const [productPendingDeletion, setProductPendingDeletion] = useState<Product | null>(null);
 
   useEffect(() => {
     const artisanName = readArtisanProfile().name;
@@ -37,6 +38,14 @@ export default function PublishedProducts() {
     window.setTimeout(() => setSavedProductId(''), 2200);
   }
 
+  function confirmProductDeletion() {
+    if (!productPendingDeletion) return;
+    deleteProduct(productPendingDeletion.id);
+    setProducts((currentProducts) => currentProducts.filter((product) => product.id !== productPendingDeletion.id));
+    setSavedProductId('');
+    setProductPendingDeletion(null);
+  }
+
   return (
     <section className="catalog-section" aria-labelledby="catalog-title">
       <div className="catalog-heading">
@@ -54,10 +63,11 @@ export default function PublishedProducts() {
           <article className="product-row" key={product.id}>
             <div className="product-image">{product.mainImage ? <img src={product.mainImage} alt="" /> : <span aria-hidden="true">artpop</span>}</div>
             <div className="product-info"><h3>{product.title}</h3><p>{categoryLabels[product.category]} · {product.technique}</p><strong>R$ {product.price.toFixed(2).replace('.', ',')}</strong></div>
-            <div className="stock-control"><label htmlFor={`stock-${product.id}`}>Estoque disponível</label><div className="stock-input"><input id={`stock-${product.id}`} type="number" min="0" step="1" value={product.stock} onChange={(event) => handleStockChange(product.id, event)} /><span>un.</span></div><button type="button" onClick={() => saveStock(product)}>Confirmar estoque</button><div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}><a className="edit-product-link" href={`/painel-artesao/editar/${product.id}`}>Editar</a><a className="edit-product-link" href={`/produtos/${product.id}`}>Ver anúncio</a></div>{savedProductId === product.id && <small role="status">Estoque atualizado</small>}</div>
+            <div className="stock-control"><label htmlFor={`stock-${product.id}`}>Estoque disponível</label><div className="stock-input"><input id={`stock-${product.id}`} type="number" min="0" step="1" value={product.stock} onChange={(event) => handleStockChange(product.id, event)} /><span>un.</span></div><button type="button" onClick={() => saveStock(product)}>Confirmar estoque</button><div className="product-row-actions"><a className="edit-product-link" href={`/painel-artesao/editar/${product.id}`}>Editar</a><a className="edit-product-link" href={`/produtos/${product.id}`}>Ver anúncio</a><button className="delete-product-link" type="button" onClick={() => setProductPendingDeletion(product)}>Excluir anúncio</button></div>{savedProductId === product.id && <small role="status">Estoque atualizado</small>}</div>
           </article>
         ))}</div>
       )}
+      {productPendingDeletion && <div className="announcement-success-backdrop" role="presentation"><section className="announcement-success-modal product-delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="product-delete-title" aria-describedby="product-delete-description"><h2 id="product-delete-title">Confirmar exclusão</h2><p id="product-delete-description">Deseja mesmo excluir o anúncio dessa obra?</p><div className="product-delete-actions"><button type="button" onClick={confirmProductDeletion}>Sim</button><button className="product-delete-cancel" type="button" onClick={() => setProductPendingDeletion(null)}>Não</button></div></section></div>}
     </section>
   );
 }
