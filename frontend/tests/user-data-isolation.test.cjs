@@ -66,7 +66,8 @@ function setCurrentUser(id) {
 
 test('mantém carrinho, frete e cupom separados entre contas', () => {
   setCurrentUser('buyer-1');
-  storage.setItem('origem:cart:buyer-1', JSON.stringify([{ id: 'item-1', quantity: 1 }]));
+  const cartItem = { id: 'item-1', quantity: 1, weightKg: 0.5, lengthCm: 20, widthCm: 15, heightCm: 10 };
+  storage.setItem('origem:cart:buyer-1', JSON.stringify([cartItem]));
   const shipping = {
     id: 'PAC',
     name: 'PAC',
@@ -83,7 +84,7 @@ test('mantém carrinho, frete e cupom separados entre contas', () => {
   assert.equal(readAppliedCoupon(), null);
 
   setCurrentUser('buyer-1');
-  assert.deepEqual(readCart(), [{ id: 'item-1', quantity: 1 }]);
+  assert.deepEqual(readCart(), [cartItem]);
   assert.deepEqual(readShippingSelection(), shipping);
   assert.equal(readAppliedCoupon().code, 'ARTPOP10');
 });

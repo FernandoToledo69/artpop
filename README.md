@@ -111,7 +111,7 @@ No PowerShell, o mesmo comando pode ser executado a partir do diretório `fronte
 - Agrupamento de itens por artesão.
 - Cálculo de subtotal em tempo real.
 - Campo para inserção de cupom de desconto.
-- Cálculo de frete simulado por CEP (PAC e Sedex) com valores dinâmicos por região.
+- Cálculo de frete simulado por CEP (PAC e Sedex) na página da obra e no carrinho, considerando peso e volume dos itens e exibindo o custo total da compra.
 - Estado vazio com chamada para explorar obras.
 - O visitante pode navegar e adicionar produtos ao carrinho sem estar autenticado.
 - A finalização da compra exige uma sessão ativa e redireciona visitantes para `/login`.
@@ -142,7 +142,7 @@ No PowerShell, o mesmo comando pode ser executado a partir do diretório `fronte
 ### Perfil e painel do artesão
 
 - Visualização e edição dos dados do perfil (nome, cidade, bio e foto de avatar).
-- Publicação de obras com validação de campos obrigatórios (título, categoria, técnica, descrição, preço, estoque e foto principal).
+- Publicação de obras com validação de campos obrigatórios (título, categoria, técnica, descrição, preço, estoque, foto principal, peso e dimensões da embalagem).
 - Upload local de foto principal e até quatro fotos adicionais.
 - Listagem das obras publicadas com busca por nome, categoria ou técnica.
 - Controle de estoque: atualização de quantidade com confirmação e feedback visual.

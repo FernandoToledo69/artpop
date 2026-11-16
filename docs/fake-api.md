@@ -55,6 +55,10 @@ interface Product {
   technique: string;
   price: number;
   stock: number;
+  weightKg: number;
+  lengthCm: number;
+  widthCm: number;
+  heightCm: number;
   description: string;
   mainImage: string;
   additionalImages: string[];
@@ -127,7 +131,7 @@ Operações atuais:
 
 O visitante pode navegar e montar o carrinho sem login. A autenticação só é exigida ao entrar no checkout ou finalizar a compra.
 
-A cotação de frete é simulada com base nos dois primeiros dígitos do CEP e retorna PAC e Sedex. No backend real, o cálculo deve consultar uma transportadora ou regra de frete configurada no servidor.
+A cotação de frete é simulada com base nos dois primeiros dígitos do CEP e no peso tarifável do carrinho (o maior entre o peso total e o peso cúbico, calculado a partir das dimensões de envio). Retorna PAC e Sedex com preço e prazo estimados; o total exibido soma a opção escolhida ao subtotal após descontos. Os campos de envio são obrigatórios ao anunciar ou editar uma obra. Ao ler anúncios antigos sem medidas, a Fake API os completa com estimativas por categoria, persiste os valores e os sinaliza para revisão pelo artesão; estes valores não substituem a pesagem e medição reais da embalagem. No backend real, o cálculo deve consultar uma transportadora ou regra de frete configurada no servidor.
 
 ### 4.5 Pedidos e pagamentos
 

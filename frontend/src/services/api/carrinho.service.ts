@@ -15,6 +15,10 @@ export interface CartItem {
 	price: number;
 	quantity: number;
 	stock: number;
+	weightKg: number;
+	lengthCm: number;
+	widthCm: number;
+	heightCm: number;
 	category: Product['category'];
 	mainImage: string;
 }
@@ -28,7 +32,19 @@ export function readCart(): CartItem[] {
 
 	try {
 		const savedItems = JSON.parse(localStorage.getItem(getUserScopedStorageKey(CART_STORAGE_KEY)) ?? '[]') as CartItem[];
-		return savedItems.filter((item) => item.quantity > 0);
+		const products = readCatalogProducts();
+		return savedItems
+			.filter((item) => item.quantity > 0)
+			.map((item) => {
+				const product = products.find((candidate) => candidate.id === item.id);
+				return {
+					...item,
+					weightKg: product?.weightKg ?? item.weightKg ?? 0,
+					lengthCm: product?.lengthCm ?? item.lengthCm ?? 0,
+					widthCm: product?.widthCm ?? item.widthCm ?? 0,
+					heightCm: product?.heightCm ?? item.heightCm ?? 0,
+				};
+			});
 	} catch {
 		return [];
 	}
@@ -66,6 +82,10 @@ export function addToCart(product: Product, currentUser: AuthUser | null, quanti
 		price: currentProduct.price,
 		quantity: Math.min(quantityToAdd, currentProduct.stock),
 		stock: currentProduct.stock,
+		weightKg: currentProduct.weightKg,
+		lengthCm: currentProduct.lengthCm,
+		widthCm: currentProduct.widthCm,
+		heightCm: currentProduct.heightCm,
 		category: currentProduct.category,
 		mainImage: currentProduct.mainImage,
 	}]);
@@ -111,17 +131,38 @@ export function calculateShippingTotal(subtotal: number, option: ShippingOption)
 	return Math.round((subtotal + option.price + Number.EPSILON) * 100) / 100;
 }
 
-export async function calculateShipping(postalCode: string): Promise<ShippingQuote> {
+function getChargeableWeight(items: readonly CartItem[]): number {
+	if (items.length === 0) throw new Error('Adicione ao menos uma obra para calcular o frete.');
+
+	let totalWeightKg = 0;
+	let totalVolumeCm3 = 0;
+	for (const item of items) {
+		const measurements = [item.weightKg, item.lengthCm, item.widthCm, item.heightCm];
+		if (!measurements.every((value) => Number.isFinite(value) && value > 0)) {
+			throw new Error(`A obra "${item.title}" precisa ter peso e dimensões válidos para calcular o frete.`);
+		}
+		if (!Number.isFinite(item.quantity) || item.quantity < 1) {
+			throw new Error(`A quantidade da obra "${item.title}" não é válida para calcular o frete.`);
+		}
+		totalWeightKg += item.weightKg * item.quantity;
+		totalVolumeCm3 += item.lengthCm * item.widthCm * item.heightCm * item.quantity;
+	}
+
+	return Math.max(totalWeightKg, totalVolumeCm3 / 5000);
+}
+
+export async function calculateShipping(postalCode: string, items?: readonly CartItem[]): Promise<ShippingQuote> {
 	const normalizedPostalCode = postalCode.replace(/\D/g, '');
 
 	if (normalizedPostalCode.length !== 8 || /^(\d)\1{7}$/.test(normalizedPostalCode)) {
 		throw new Error('Informe um CEP válido com 8 números.');
 	}
 
+	const chargeableWeightKg = items ? getChargeableWeight(items) : 1;
 	await new Promise((resolve) => setTimeout(resolve, 350));
 
 	const regionalFactor = Number(normalizedPostalCode.slice(0, 2)) % 5;
-	const pacPrice = Math.round((18.9 + regionalFactor * 2.45 + Number.EPSILON) * 100) / 100;
+	const pacPrice = Math.round((18.9 + regionalFactor * 2.45 + Math.max(0, chargeableWeightKg - 1) * 2.5 + Number.EPSILON) * 100) / 100;
 	const sedexPrice = Math.round((pacPrice + 14.5 + Number.EPSILON) * 100) / 100;
 
 	return {

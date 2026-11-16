@@ -5,6 +5,7 @@ import { demoProducts } from '../marketplace/MarketplaceProducts';
 import { getCurrentUser } from '../../services/api/auth.service';
 import { isProductOwner, readCatalogProducts, updateProduct } from '../../services/api/produtos.service';
 import { Product, ProductDraft } from '../../types/produto';
+import { validateProductDraft } from './product-announcement';
 
 function fileToDataUrl(file: File): Promise<string> {
 	return new Promise((resolve, reject) => {
@@ -26,7 +27,15 @@ export default function ProductEditForm({ productId }: { productId: string }) {
 		const candidate = readCatalogProducts().find((item) => item.id === productId) ?? null;
 		const foundProduct = candidate && isProductOwner(candidate, user) ? candidate : null;
 		setProduct(foundProduct);
-		if (foundProduct) setDraft({ ...foundProduct, price: String(foundProduct.price), stock: String(foundProduct.stock) });
+		if (foundProduct) setDraft({
+			...foundProduct,
+			price: String(foundProduct.price),
+			stock: String(foundProduct.stock),
+			weightKg: foundProduct.weightKg > 0 ? String(foundProduct.weightKg) : '',
+			lengthCm: foundProduct.lengthCm > 0 ? String(foundProduct.lengthCm) : '',
+			widthCm: foundProduct.widthCm > 0 ? String(foundProduct.widthCm) : '',
+			heightCm: foundProduct.heightCm > 0 ? String(foundProduct.heightCm) : '',
+		});
 	}, [productId]);
 
 	function updateField(field: keyof ProductDraft, value: string) {
@@ -53,7 +62,13 @@ export default function ProductEditForm({ productId }: { productId: string }) {
 			setError('Adicione no máximo 4 fotos extras.');
 			return;
 		}
-		updateProduct(product.id, draft, product);
+		const validationErrors = validateProductDraft(draft);
+		if (Object.keys(validationErrors).length > 0) {
+			setError(Object.values(validationErrors)[0]);
+			return;
+		}
+		const updatedProduct = updateProduct(product.id, draft, product);
+		if (updatedProduct) setProduct(updatedProduct);
 		setSuccessMessage('Obra atualizada com sucesso.');
 	}
 
@@ -63,6 +78,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
 		<section className="form-section"><div className="section-heading"><span className="section-number">01</span><div><h2>Dados da obra</h2><p>Atualize as informações que aparecem no anúncio.</p></div></div><div className="field-grid"><label className="field field-wide">Nome da obra<input value={draft.title} onChange={(event) => updateField('title', event.target.value)} /></label><label className="field">Categoria<select value={draft.category} onChange={(event) => updateField('category', event.target.value)}><option value="ceramica">Cerâmica</option><option value="madeira">Madeira</option><option value="textil">Têxtil</option><option value="joalheria">Joalheria</option><option value="outros">Outros</option></select></label><label className="field">Técnica<input value={draft.technique} onChange={(event) => updateField('technique', event.target.value)} /></label><label className="field field-wide">Descrição<textarea value={draft.description} onChange={(event) => updateField('description', event.target.value)} rows={5} /></label></div></section>
 		<section className="form-section media-section"><div className="section-heading"><span className="section-number">02</span><div><h2>Fotos da obra</h2><p>A foto principal e até 4 fotos extras aparecem na galeria.</p></div></div><div className="upload-layout"><label className="main-upload"><img src={draft.mainImage} alt="Foto principal da obra" /><input type="file" accept="image/png,image/jpeg" onChange={async (event) => { const file = event.target.files?.[0]; if (file) updateField('mainImage', await fileToDataUrl(file)); }} /></label><div className="additional-upload"><p>Fotos extras <span>({draft.additionalImages.length}/4)</span></p><label className="secondary-upload"><span>+</span> Substituir fotos extras<input type="file" accept="image/png,image/jpeg" multiple onChange={handleAdditionalImages} /></label><div className="thumbnail-row">{draft.additionalImages.map((image) => <img key={image} src={image} alt="Prévia de foto extra" />)}</div></div></div>{error && <small className="error">{error}</small>}</section>
 		<section className="form-section"><div className="section-heading"><span className="section-number">03</span><div><h2>Oferta</h2><p>Preço e disponibilidade da peça.</p></div></div><div className="field-grid offer-grid"><label className="field">Preço<div className="input-prefix"><span>R$</span><input type="number" min="0.01" step="0.01" value={draft.price} onChange={(event) => updateField('price', event.target.value)} /></div></label><label className="field">Estoque<input type="number" min="1" value={draft.stock} onChange={(event) => updateField('stock', event.target.value)} /></label></div></section>
+		<section className="form-section"><div className="section-heading"><span className="section-number">04</span><div><h2>Dados para envio</h2><p>Informe o peso e as dimensões da embalagem para o cálculo do frete.</p></div></div>{product?.shippingMeasurementsEstimated && <p className="shipping-help" role="note">Os valores atuais são estimativas por categoria adicionadas para recuperar este anúncio. Revise-os e informe as medidas reais da embalagem.</p>}<div className="field-grid offer-grid"><label className="field">Peso para envio (kg)<input type="number" min="0.01" step="0.01" value={draft.weightKg} onChange={(event) => updateField('weightKg', event.target.value)} /></label><label className="field">Comprimento (cm)<input type="number" min="0.1" step="0.1" value={draft.lengthCm} onChange={(event) => updateField('lengthCm', event.target.value)} /></label><label className="field">Largura (cm)<input type="number" min="0.1" step="0.1" value={draft.widthCm} onChange={(event) => updateField('widthCm', event.target.value)} /></label><label className="field">Altura (cm)<input type="number" min="0.1" step="0.1" value={draft.heightCm} onChange={(event) => updateField('heightCm', event.target.value)} /></label></div></section>
 		<div className="form-footer"><a href="/painel-artesao">Cancelar</a><button type="submit">Salvar alterações</button></div>{successMessage && <p className="success-message" role="status">{successMessage} <a href={`/produtos/${productId}`}>Ver anúncio</a></p>}
 	</form>;
 }
