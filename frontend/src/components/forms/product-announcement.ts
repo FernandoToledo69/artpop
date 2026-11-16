@@ -8,8 +8,60 @@ export function selectAdditionalImageFiles(files: readonly File[], currentCount 
     .slice(0, Math.max(0, MAX_ADDITIONAL_IMAGES - currentCount));
 }
 
+export function selectProductImageFiles(
+  files: readonly File[],
+  currentAdditionalCount = 0,
+  hasMainImage = false,
+): File[] {
+  const availableSlots = MAX_ADDITIONAL_IMAGES - currentAdditionalCount + (hasMainImage ? 0 : 1);
+  return files
+    .filter((file) => file.type.startsWith('image/'))
+    .slice(0, Math.max(0, availableSlots));
+}
+
 export function appendAdditionalImages(currentImages: readonly string[], newImages: readonly string[]): string[] {
   return [...currentImages, ...newImages].slice(0, MAX_ADDITIONAL_IMAGES);
+}
+
+export function appendProductImages(
+  mainImage: string,
+  additionalImages: readonly string[],
+  newImages: readonly string[],
+): { mainImage: string; additionalImages: string[] } {
+  let nextMainImage = mainImage;
+  let nextAdditionalImages = [...newImages];
+  if (!nextMainImage && nextAdditionalImages.length > 0) {
+    [nextMainImage, ...nextAdditionalImages] = nextAdditionalImages;
+  }
+  return {
+    mainImage: nextMainImage,
+    additionalImages: appendAdditionalImages(additionalImages, nextAdditionalImages),
+  };
+}
+
+export function moveAdditionalImage(images: readonly string[], index: number, direction: -1 | 1): string[] {
+  const targetIndex = index + direction;
+  if (index < 0 || index >= images.length || targetIndex < 0 || targetIndex >= images.length) return [...images];
+
+  const reorderedImages = [...images];
+  [reorderedImages[index], reorderedImages[targetIndex]] = [reorderedImages[targetIndex], reorderedImages[index]];
+  return reorderedImages;
+}
+
+export function promoteAdditionalImage(
+  mainImage: string,
+  additionalImages: readonly string[],
+  index: number,
+): { mainImage: string; additionalImages: string[] } {
+  if (index < 0 || index >= additionalImages.length) {
+    return { mainImage, additionalImages: [...additionalImages] };
+  }
+
+  const reorderedImages = [...additionalImages];
+  const promotedImage = reorderedImages[index];
+  reorderedImages.splice(index, 1);
+  if (mainImage) reorderedImages.unshift(mainImage);
+  return { mainImage: promotedImage, additionalImages: reorderedImages };
 }
 
 export function validateProductDraft(draft: ProductDraft): Record<string, string> {

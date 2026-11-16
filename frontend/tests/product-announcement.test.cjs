@@ -17,6 +17,10 @@ require.extensions['.ts'] = (module, filename) => {
 
 const {
   appendAdditionalImages,
+  appendProductImages,
+  moveAdditionalImage,
+  promoteAdditionalImage,
+  selectProductImageFiles,
   selectAdditionalImageFiles,
   validateProductDraft,
 } = require('../src/components/forms/product-announcement.ts');
@@ -131,6 +135,40 @@ test('acumula até quatro imagens adicionais em seleções separadas e ignora ar
 
   assert.deepEqual(combinedImages, ['one.png', 'two.jpg', 'three.png', 'four.jpg']);
   assert.deepEqual(selectAdditionalImageFiles(files, 4), []);
+});
+
+test('usa a primeira imagem selecionada como principal e mantém até quatro fotos adicionais', () => {
+  const files = Array.from({ length: 6 }, (_, index) => (
+    new File([], `photo-${index + 1}.png`, { type: 'image/png' })
+  ));
+
+  assert.deepEqual(
+    selectProductImageFiles(files, 0, false).map((file) => file.name),
+    ['photo-1.png', 'photo-2.png', 'photo-3.png', 'photo-4.png', 'photo-5.png'],
+  );
+  assert.deepEqual(
+    selectProductImageFiles(files, 3, true).map((file) => file.name),
+    ['photo-1.png'],
+  );
+  assert.deepEqual(appendProductImages('', [], ['photo-1', 'photo-2', 'photo-3']), {
+    mainImage: 'photo-1',
+    additionalImages: ['photo-2', 'photo-3'],
+  });
+  assert.deepEqual(appendProductImages('main', ['extra-1'], ['extra-2']), {
+    mainImage: 'main',
+    additionalImages: ['extra-1', 'extra-2'],
+  });
+});
+
+test('reordena fotos adicionais e permite promover uma delas a foto principal', () => {
+  const images = ['photo-2', 'photo-3', 'photo-4'];
+
+  assert.deepEqual(moveAdditionalImage(images, 1, -1), ['photo-3', 'photo-2', 'photo-4']);
+  assert.deepEqual(moveAdditionalImage(images, 0, -1), images);
+  assert.deepEqual(promoteAdditionalImage('photo-1', images, 1), {
+    mainImage: 'photo-3',
+    additionalImages: ['photo-1', 'photo-2', 'photo-4'],
+  });
 });
 
 test('publica e disponibiliza no catálogo a obra com suas quatro imagens', async () => {
