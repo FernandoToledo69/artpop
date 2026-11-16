@@ -359,10 +359,17 @@ button { background: var(--orange); } button:hover { background: #b74431; }
 .cart-summary { padding: 28px; }
 .cart-summary h2 { font-size: 20px; margin-bottom: 22px; }
 .cart-summary > div { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 13px; padding: 10px 0; }
-.cart-summary .cart-coupon { display: block; width: 100%; }
-.cart-summary .cart-coupon > div { display: flex !important; flex-direction: column; gap: 10px !important; width: 100%; }
-.cart-summary .cart-coupon input { width: 100%; min-height: 42px; padding: 10px 12px !important; }
-.cart-summary .cart-coupon button { width: 100%; min-height: 42px; margin-top: 0; }
+.cart-summary .cart-coupon, .cart-summary .cart-shipping { display: block; width: 100%; margin: 14px 0; }
+.cart-summary .cart-coupon label, .cart-summary .cart-shipping .field { display: block; margin-bottom: 6px; color: var(--ink); font-size: 13px; font-weight: 600; }
+.cart-summary .cart-coupon > div, .cart-summary .cart-shipping .shipping-form { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 0; }
+.cart-summary .cart-coupon input, .cart-summary .cart-shipping .shipping-form input { width: 100%; min-height: 42px; padding: 10px 12px; }
+.cart-summary .cart-coupon button, .cart-summary .cart-shipping .shipping-form button { width: 100%; min-height: 42px; height: auto; margin: 0; }
+.cart-summary .cart-shipping { padding: 14px 0 0; border-top: 1px solid var(--line); background: transparent; box-shadow: none; }
+.cart-summary .cart-shipping h3 { margin: 0 0 10px; color: var(--ink); font-size: 13px; }
+.cart-summary .cart-shipping .shipping-help, .cart-summary .cart-shipping .error { margin: 8px 0 0; font-size: 11px; }
+.cart-summary .cart-shipping .shipping-options { margin-top: 14px; padding-top: 12px; }
+.cart-summary .cart-shipping .shipping-option { padding: 10px; }
+.cart-summary .cart-shipping .shipping-total { font-size: 13px; }
 .cart-summary strong { color: var(--ink); }
 .summary-muted { color: var(--orange); font-size: 12px; }
 .cart-summary .summary-total { border-top: 1px solid var(--line); margin-top: 10px; padding: 18px 0; color: var(--ink); font-weight: 700; }
