@@ -1,9 +1,19 @@
-import { Product, ProductDraft } from '../../types/produto';
+import { Product, ProductCategory, ProductDraft } from '../../types/produto';
 import type { AuthUser } from '../../types/auth';
 import { demoProducts } from '../../mocks/products';
 import { readArtisanProfile } from './usuarios.service';
 
 const STORAGE_KEY = 'origem:products';
+
+const estimatedShippingMeasurements: Record<ProductCategory, Pick<Product, 'weightKg' | 'lengthCm' | 'widthCm' | 'heightCm'>> = {
+  ceramica: { weightKg: 1.2, lengthCm: 20, widthCm: 20, heightCm: 30 },
+  madeira: { weightKg: 0.8, lengthCm: 30, widthCm: 20, heightCm: 8 },
+  textil: { weightKg: 0.8, lengthCm: 35, widthCm: 20, heightCm: 15 },
+  joalheria: { weightKg: 0.15, lengthCm: 18, widthCm: 12, heightCm: 5 },
+  outros: { weightKg: 0.3, lengthCm: 25, widthCm: 20, heightCm: 5 },
+};
+
+const shippingMeasurementFields = ['weightKg', 'lengthCm', 'widthCm', 'heightCm'] as const;
 
 const catalogImages: Record<string, string> = {
   'stefani-1': 'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&w=900&q=85',
@@ -24,6 +34,10 @@ export async function createProduct(draft: ProductDraft, artisanId?: string): Pr
     id: crypto.randomUUID(),
     price: Number(draft.price),
     stock: Number(draft.stock),
+    weightKg: Number(draft.weightKg),
+    lengthCm: Number(draft.lengthCm),
+    widthCm: Number(draft.widthCm),
+    heightCm: Number(draft.heightCm),
     createdAt: new Date().toISOString(),
     artisanCity: artisanProfile.city.trim(),
     artisanId,
@@ -40,11 +54,40 @@ export function readProducts(): Product[] {
   if (typeof window === 'undefined') return [];
 
   try {
-    return (JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as Product[]).map((product) => ({
-      ...product,
-      artisanCity: product.artisanCity || '',
-      artisanName: product.artisanName || 'Artesão',
-    }));
+    const savedProducts = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as Product[];
+    let hasLegacyMeasurements = false;
+    const products = savedProducts.map((product) => {
+      const defaults = product.category && estimatedShippingMeasurements[product.category]
+        ? estimatedShippingMeasurements[product.category]
+        : estimatedShippingMeasurements.outros;
+      const hasMissingMeasurements = shippingMeasurementFields.some((field) => (
+        !Number.isFinite(Number(product[field])) || Number(product[field]) <= 0
+      ));
+      if (hasMissingMeasurements) hasLegacyMeasurements = true;
+      const getMeasurement = (field: typeof shippingMeasurementFields[number]) => {
+        const value = Number(product[field]);
+        return Number.isFinite(value) && value > 0 ? value : defaults[field];
+      };
+      const measurements = {
+        weightKg: getMeasurement('weightKg'),
+        lengthCm: getMeasurement('lengthCm'),
+        widthCm: getMeasurement('widthCm'),
+        heightCm: getMeasurement('heightCm'),
+      };
+
+      return {
+        ...product,
+        artisanCity: product.artisanCity || '',
+        artisanName: product.artisanName || 'Artesão',
+        ...measurements,
+        ...(product.shippingMeasurementsEstimated || hasMissingMeasurements
+          ? { shippingMeasurementsEstimated: true }
+          : {}),
+      };
+    });
+
+    if (hasLegacyMeasurements) localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    return products;
   } catch {
     return [];
   }
@@ -98,6 +141,13 @@ export function updateProduct(productId: string, updates: ProductDraft, fallback
     ...updates,
     price: Number(updates.price),
     stock: Number(updates.stock),
+    weightKg: Number(updates.weightKg),
+    lengthCm: Number(updates.lengthCm),
+    widthCm: Number(updates.widthCm),
+    heightCm: Number(updates.heightCm),
+    shippingMeasurementsEstimated: currentProduct.shippingMeasurementsEstimated
+      ? shippingMeasurementFields.every((field) => Number(updates[field]) === currentProduct[field])
+      : undefined,
   };
   const updatedProducts = productIndex >= 0
     ? products.map((product, index) => index === productIndex ? updatedProduct : product)

@@ -6,6 +6,7 @@ import { getCurrentUser } from '../../services/api/auth.service';
 import { Product } from '../../types/produto';
 import { demoProducts } from '../../mocks/products';
 import { addToCart } from '../../services/api/carrinho.service';
+import ShippingCalculator from '../carrinho/ShippingCalculator';
 import { readRelatedProducts } from '../../services/api/recomendacoes.services';
 import ProfileAvatar from '../ui/ProfileAvatar';
 
@@ -74,6 +75,16 @@ export default function ProductDetail({ productId }: { productId: string }) {
         <p className={`product-stock${product.stock === 0 ? ' product-stock-unavailable' : ''}`} style={product.stock === 0 ? { color: '#bd4d3e', fontWeight: 'bold' } : product.stock === 1 ? { color: '#d9534f', fontWeight: 'bold' } : {}}>
           {product.stock === 0 ? 'Esgotada' : product.stock === 1 ? 'último item disponível' : `${product.stock} unidades disponíveis`}
         </p>
+        <section className="product-shipping-details" aria-labelledby="product-shipping-title">
+          <h2 id="product-shipping-title">Peso e dimensões para envio</h2>
+          <dl>
+            <div><dt>Peso</dt><dd>{product.weightKg.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} kg</dd></div>
+            <div><dt>Comprimento</dt><dd>{product.lengthCm.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} cm</dd></div>
+            <div><dt>Largura</dt><dd>{product.widthCm.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} cm</dd></div>
+            <div><dt>Altura</dt><dd>{product.heightCm.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} cm</dd></div>
+          </dl>
+          {product.shippingMeasurementsEstimated && <p className="product-shipping-estimate">Peso e dimensões estimados. Consulte o artesão para confirmar as medidas reais da embalagem.</p>}
+        </section>
         <div className="payment-box"><h2>Pagamento</h2><p>Até 3x sem juros de {formatPrice(product.price / 3)}</p><p>ou {formatPrice(product.price)} no Pix</p></div>
         {isOwner ? (
           <a className="add-to-cart-button owner-edit-link" href={`/painel-artesao/editar/${product.id}`}>Editar</a>
@@ -89,6 +100,26 @@ export default function ProductDetail({ productId }: { productId: string }) {
           </div>
         )}
         {cartMessage && <p className="cart-feedback" role="status">{cartMessage} <a href="/carrinho">Ver carrinho</a></p>}
+        {!isOwner && <ShippingCalculator
+          subtotal={product.price * selectedQuantity}
+          items={[{
+            id: product.id,
+            title: product.title,
+            artisanName,
+            artisanId: product.artisanId,
+            artisanCity: product.artisanCity,
+            price: product.price,
+            quantity: selectedQuantity,
+            stock: product.stock,
+            weightKg: product.weightKg,
+            lengthCm: product.lengthCm,
+            widthCm: product.widthCm,
+            heightCm: product.heightCm,
+            category: product.category,
+            mainImage: product.mainImage,
+          }]}
+          persistSelection={false}
+        />}
       </div>
       <section className="artist-story"><p className="eyebrow">QUEM FAZ</p><h2>{artisanName}</h2><p className="artist-location">{product.artisanCity}</p><p>{story}</p><a href={`/artesoes/${artisanName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>Conhecer perfil do artesão</a></section><section className="catalog-section"><div className="catalog-heading"><div><p className="eyebrow">VOCÊ TAMBÉM PODE GOSTAR</p><h2>Outras criações</h2></div></div><div className="marketplace-grid">{relatedProducts.map((item) => <a className="marketplace-card" href={`/produtos/${item.id}`} key={item.id}><div className="product-image">{item.mainImage ? <img src={item.mainImage} alt="" /> : <span aria-hidden="true">artpop</span>}</div><div className="product-info"><h3>{item.title}</h3><p>{item.technique}</p><strong>R$ {item.price.toFixed(2).replace('.', ',')}</strong></div></a>)}</div></section>
       <section className="review-section"><div><p className="eyebrow">COMUNIDADE</p><h2>Deixe sua impressão</h2><p>Compartilhe o que essa obra despertou em você.</p></div><form onSubmit={handleComment}><div className="review-author"><ProfileAvatar className="review-avatar" label="Foto do seu perfil" /><strong>LG</strong></div><textarea value={comment} onChange={(event) => { setComment(event.target.value); setCommentSaved(false); }} placeholder="Escreva um comentário ou avaliação" rows={4} aria-label="Comentário ou avaliação" /><button type="submit">Publicar comentário</button>{commentSaved && <small role="status">Seu comentário foi publicado.</small>}</form></section>

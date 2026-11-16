@@ -26,6 +26,7 @@ const {
   isProductOwner,
   readCatalogProducts,
   readProducts,
+  updateProduct,
   updateProductStock,
 } = require('../src/services/api/produtos.service.ts');
 const { addToCart, readCart } = require('../src/services/api/carrinho.service.ts');
@@ -42,6 +43,10 @@ const draft = {
   technique: 'Modelagem manual',
   price: '125.50',
   stock: '2',
+  weightKg: '1.2',
+  lengthCm: '20',
+  widthCm: '20',
+  heightCm: '30',
   description: 'Peça artesanal feita à mão com acabamento natural.',
   mainImage: 'data:image/png;base64,main-image',
   additionalImages: [
@@ -87,6 +92,10 @@ test('valida os campos obrigatórios e aceita uma obra completa com foto princip
     technique: '',
     price: '0',
     stock: '0',
+    weightKg: '',
+    lengthCm: '0',
+    widthCm: 'abc',
+    heightCm: '-1',
     description: 'Curta',
     mainImage: '',
   });
@@ -94,11 +103,15 @@ test('valida os campos obrigatórios e aceita uma obra completa com foto princip
   assert.deepEqual(Object.keys(errors).sort(), [
     'category',
     'description',
+    'heightCm',
+    'lengthCm',
     'mainImage',
     'price',
     'stock',
     'technique',
     'title',
+    'weightKg',
+    'widthCm',
   ]);
 });
 
@@ -128,6 +141,10 @@ test('publica e disponibiliza no catálogo a obra com suas quatro imagens', asyn
   assert.equal(createdProduct.title, draft.title);
   assert.equal(createdProduct.price, 125.5);
   assert.equal(createdProduct.stock, 2);
+  assert.equal(createdProduct.weightKg, 1.2);
+  assert.equal(createdProduct.lengthCm, 20);
+  assert.equal(createdProduct.widthCm, 20);
+  assert.equal(createdProduct.heightCm, 30);
   assert.equal(createdProduct.artisanCity, 'Recife');
   assert.equal(createdProduct.artisanName, 'Stefani Germanotta');
   assert.equal(catalogProduct.mainImage, draft.mainImage);
@@ -139,9 +156,10 @@ test('publica e disponibiliza no catálogo a obra com suas quatro imagens', asyn
   assert.equal(storage.getItem('origem:products') !== null, true);
 });
 
-test('não associa a uma conta atual dados pessoais de obras antigas sem artesão identificado', () => {
+test('migra obras antigas com medidas estimadas por categoria e não associa dados pessoais', () => {
+  const { weightKg, lengthCm, widthCm, heightCm, ...legacyDraft } = draft;
   storage.setItem('origem:products', JSON.stringify([{
-    ...draft,
+    ...legacyDraft,
     id: 'legacy-product',
     price: 125.5,
     stock: 2,
@@ -153,6 +171,69 @@ test('não associa a uma conta atual dados pessoais de obras antigas sem artesã
 
   assert.equal(legacyProduct.artisanName, 'Artesão');
   assert.equal(legacyProduct.artisanCity, 'Recife');
+  assert.equal(legacyProduct.weightKg, 1.2);
+  assert.equal(legacyProduct.lengthCm, 20);
+  assert.equal(legacyProduct.widthCm, 20);
+  assert.equal(legacyProduct.heightCm, 30);
+  assert.equal(legacyProduct.shippingMeasurementsEstimated, true);
+  assert.deepEqual(JSON.parse(storage.getItem('origem:products'))[0], legacyProduct);
+});
+
+test('preenche apenas as medidas ausentes e preserva as medidas válidas existentes', () => {
+  storage.setItem('origem:products', JSON.stringify([{
+    ...draft,
+    id: 'partially-measured',
+    price: 125.5,
+    stock: 2,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    artisanCity: 'Recife',
+    weightKg: 2.4,
+    lengthCm: 0,
+    widthCm: 24,
+    heightCm: undefined,
+  }]));
+
+  const product = readProducts()[0];
+
+  assert.equal(product.weightKg, 2.4);
+  assert.equal(product.lengthCm, 20);
+  assert.equal(product.widthCm, 24);
+  assert.equal(product.heightCm, 30);
+  assert.equal(product.shippingMeasurementsEstimated, true);
+});
+
+test('permite substituir as medidas estimadas de uma obra legada', () => {
+  const { weightKg, lengthCm, widthCm, heightCm, ...legacyDraft } = draft;
+  storage.setItem('origem:products', JSON.stringify([{
+    ...legacyDraft,
+    id: 'legacy-product',
+    price: 125.5,
+    stock: 2,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    artisanCity: 'Recife',
+    artisanId: 'artisan-123',
+  }]));
+
+  const updatedProduct = updateProduct(
+    'legacy-product',
+    { ...draft, weightKg: '0.8', lengthCm: '25', widthCm: '18', heightCm: '12' },
+  );
+
+  assert.equal(updatedProduct.weightKg, 0.8);
+  assert.equal(updatedProduct.lengthCm, 25);
+  assert.equal(updatedProduct.widthCm, 18);
+  assert.equal(updatedProduct.heightCm, 12);
+  assert.equal(updatedProduct.shippingMeasurementsEstimated, false);
+  assert.equal(readProducts().find((product) => product.id === 'legacy-product').weightKg, 0.8);
+});
+
+test('as obras de demonstração possuem dados de peso e dimensões para envio', () => {
+  assert.ok(readCatalogProducts().every((product) => (
+    product.weightKg > 0
+    && product.lengthCm > 0
+    && product.widthCm > 0
+    && product.heightCm > 0
+  )));
 });
 
 test('exclui permanentemente a obra e suas informações sem afetar outras publicações', async () => {

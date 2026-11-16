@@ -12,6 +12,10 @@ const initialDraft: ProductDraft = {
   technique: '',
   price: '',
   stock: '1',
+  weightKg: '',
+  lengthCm: '',
+  widthCm: '',
+  heightCm: '',
   description: '',
   mainImage: '',
   additionalImages: [],
@@ -127,6 +131,16 @@ export default function ProductAnnouncementForm() {
         <div className="field-grid offer-grid">
           <label className="field">Preço da obra <div className="input-prefix"><span>R$</span><input type="number" min="0.01" step="0.01" value={draft.price} onChange={(event) => updateField('price', event.target.value)} placeholder="0,00" /></div>{errors.price && <small className="error">{errors.price}</small>}</label>
           <label className="field">Quantidade disponível <input type="number" min="1" step="1" value={draft.stock} onChange={(event) => updateField('stock', event.target.value)} />{errors.stock && <small className="error">{errors.stock}</small>}</label>
+        </div>
+      </section>
+
+      <section className="form-section">
+        <div className="section-heading"><span className="section-number">04</span><div><h2>Prepare o envio</h2><p>Informe o peso e as dimensões da embalagem para calcular o frete corretamente.</p></div></div>
+        <div className="field-grid offer-grid">
+          <label className="field">Peso para envio (kg)<input type="number" min="0.01" step="0.01" value={draft.weightKg} onChange={(event) => updateField('weightKg', event.target.value)} placeholder="0,00" />{errors.weightKg && <small className="error">{errors.weightKg}</small>}</label>
+          <label className="field">Comprimento (cm)<input type="number" min="0.1" step="0.1" value={draft.lengthCm} onChange={(event) => updateField('lengthCm', event.target.value)} placeholder="0,0" />{errors.lengthCm && <small className="error">{errors.lengthCm}</small>}</label>
+          <label className="field">Largura (cm)<input type="number" min="0.1" step="0.1" value={draft.widthCm} onChange={(event) => updateField('widthCm', event.target.value)} placeholder="0,0" />{errors.widthCm && <small className="error">{errors.widthCm}</small>}</label>
+          <label className="field">Altura (cm)<input type="number" min="0.1" step="0.1" value={draft.heightCm} onChange={(event) => updateField('heightCm', event.target.value)} placeholder="0,0" />{errors.heightCm && <small className="error">{errors.heightCm}</small>}</label>
         </div>
       </section>
 
