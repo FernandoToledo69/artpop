@@ -5,6 +5,10 @@ import { readArtisanProfile } from './usuarios.service';
 
 const STORAGE_KEY = 'origem:products';
 
+function saveProducts(products: Product[]): void {
+	localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+}
+
 const estimatedShippingMeasurements: Record<ProductCategory, Pick<Product, 'weightKg' | 'lengthCm' | 'widthCm' | 'heightCm'>> = {
   ceramica: { weightKg: 1.2, lengthCm: 20, widthCm: 20, heightCm: 30 },
   madeira: { weightKg: 0.8, lengthCm: 30, widthCm: 20, heightCm: 8 },
@@ -46,7 +50,7 @@ export async function createProduct(draft: ProductDraft, artisanId?: string): Pr
   };
 
   const savedProducts = readProducts();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify([product, ...savedProducts]));
+  saveProducts([product, ...savedProducts]);
   return product;
 }
 
@@ -86,7 +90,7 @@ export function readProducts(): Product[] {
       };
     });
 
-    if (hasLegacyMeasurements) localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    if (hasLegacyMeasurements) saveProducts(products);
     return products;
   } catch {
     return [];
@@ -109,7 +113,7 @@ export function isProductOwner(product: Product, user: AuthUser | null): boolean
 
 export function deleteProduct(productId: string): void {
   const remainingProducts = readProducts().filter((product) => product.id !== productId);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(remainingProducts));
+  saveProducts(remainingProducts);
 }
 
 export function updateProductStock(productId: string, stock: number, fallbackProduct?: Product): Product | null {
@@ -119,14 +123,14 @@ export function updateProductStock(productId: string, stock: number, fallbackPro
     const sourceProduct = fallbackProduct ?? demoProducts.find((product) => product.id === productId);
     if (!sourceProduct) return null;
     const savedProduct = { ...sourceProduct, stock };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([savedProduct, ...products]));
+    saveProducts([savedProduct, ...products]);
     return savedProduct;
   }
 
   const updatedProduct = { ...products[productIndex], stock };
   const updatedProducts = [...products];
   updatedProducts[productIndex] = updatedProduct;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProducts));
+  saveProducts(updatedProducts);
   return updatedProduct;
 }
 
@@ -152,6 +156,6 @@ export function updateProduct(productId: string, updates: ProductDraft, fallback
   const updatedProducts = productIndex >= 0
     ? products.map((product, index) => index === productIndex ? updatedProduct : product)
     : [updatedProduct, ...products];
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProducts));
+  saveProducts(updatedProducts);
   return updatedProduct;
 }
