@@ -143,7 +143,7 @@ No PowerShell, o mesmo comando pode ser executado a partir do diretório `fronte
 
 - Visualização e edição dos dados do perfil (nome, cidade, bio e foto de avatar).
 - Publicação de obras com validação de campos obrigatórios (título, categoria, técnica, descrição, preço, estoque, foto principal, peso e dimensões da embalagem).
-- Upload local de foto principal e até quatro fotos adicionais.
+- Upload local da foto principal e até quatro fotos adicionais; a primeira foto adicionada vira automaticamente a principal, e as demais podem ser reordenadas ou promovidas à principal.
 - Listagem das obras publicadas com busca por nome, categoria ou técnica.
 - Controle de estoque: atualização de quantidade com confirmação e feedback visual.
 - Links **"Editar"** e **"Ver anúncio"** alinhados lado a lado em cada obra listada, para editar ou acessar a página pública do produto.

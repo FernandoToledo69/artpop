@@ -4,7 +4,7 @@ import { ChangeEvent, FormEvent, useState } from 'react';
 import { createProduct } from '../../services/api/produtos.service';
 import { getCurrentUser } from '../../services/api/auth.service';
 import { ProductDraft } from '../../types/produto';
-import { appendAdditionalImages, MAX_ADDITIONAL_IMAGES, selectAdditionalImageFiles, validateProductDraft } from './product-announcement';
+import { appendProductImages, MAX_ADDITIONAL_IMAGES, moveAdditionalImage, promoteAdditionalImage, selectProductImageFiles, validateProductDraft } from './product-announcement';
 
 const initialDraft: ProductDraft = {
   title: '',
@@ -54,12 +54,35 @@ export default function ProductAnnouncementForm() {
   }
 
   async function handleAdditionalImages(event: ChangeEvent<HTMLInputElement>) {
-    const files = selectAdditionalImageFiles(Array.from(event.target.files ?? []), draft.additionalImages.length);
+    const files = selectProductImageFiles(
+      Array.from(event.target.files ?? []),
+      draft.additionalImages.length,
+      Boolean(draft.mainImage),
+    );
     const images = await Promise.all(files.map(fileToDataUrl));
+    setDraft((current) => {
+      return {
+        ...current,
+        ...appendProductImages(current.mainImage, current.additionalImages, images),
+      };
+    });
+    if (images.length > 0 && !draft.mainImage) setErrors((current) => ({ ...current, mainImage: '' }));
+  }
+
+  function reorderAdditionalImage(index: number, direction: -1 | 1) {
     setDraft((current) => ({
       ...current,
-      additionalImages: appendAdditionalImages(current.additionalImages, images),
+      additionalImages: moveAdditionalImage(current.additionalImages, index, direction),
     }));
+    setShowSuccessModal(false);
+  }
+
+  function makeMainImage(index: number) {
+    setDraft((current) => ({
+      ...current,
+      ...promoteAdditionalImage(current.mainImage, current.additionalImages, index),
+    }));
+    setShowSuccessModal(false);
   }
 
   function validate() {
@@ -121,7 +144,7 @@ export default function ProductAnnouncementForm() {
             {draft.mainImage ? <img src={draft.mainImage} alt="Prévia da foto principal" /> : <><span className="upload-icon">+</span><strong>Adicionar foto principal</strong><span>JPG ou PNG · até 5 MB</span></>}
             <input type="file" accept="image/png,image/jpeg" onChange={handleMainImage} />
           </label>
-          <div className="additional-upload"><p>Outras fotos <span>(opcional)</span></p><label className="secondary-upload"><span>+</span> {remainingAdditionalImages === 0 ? 'Limite de 4 fotos atingido' : remainingAdditionalImages === 1 ? 'Adicionar mais 1 foto' : `Adicionar até ${remainingAdditionalImages} fotos`}<input type="file" accept="image/png,image/jpeg" multiple disabled={remainingAdditionalImages === 0} onChange={handleAdditionalImages} /></label><div className="thumbnail-row">{draft.additionalImages.map((image) => <img key={image} src={image} alt="Prévia adicional da obra" />)}</div></div>
+          <div className="additional-upload"><p>Outras fotos <span>(opcional)</span></p><label className="secondary-upload"><span>+</span> {remainingAdditionalImages === 0 ? 'Limite de 4 fotos atingido' : remainingAdditionalImages === 1 ? 'Adicionar mais 1 foto' : `Adicionar até ${remainingAdditionalImages} fotos`}<input type="file" accept="image/png,image/jpeg" multiple disabled={remainingAdditionalImages === 0} onChange={handleAdditionalImages} /></label><p className="image-order-help">A primeira foto adicionada vira a principal. Reordene as demais ou escolha outra como principal.</p><div className="thumbnail-row">{draft.additionalImages.map((image, index) => <div className="thumbnail-item" key={`${image}-${index}`}><img src={image} alt={`Prévia da foto ${index + 2}`} /><div className="thumbnail-actions"><button type="button" onClick={() => reorderAdditionalImage(index, -1)} disabled={index === 0} aria-label={`Mover foto ${index + 2} para antes`}>↑</button><button type="button" onClick={() => reorderAdditionalImage(index, 1)} disabled={index === draft.additionalImages.length - 1} aria-label={`Mover foto ${index + 2} para depois`}>↓</button><button type="button" onClick={() => makeMainImage(index)}>Tornar principal</button></div></div>)}</div></div>
         </div>
         {errors.mainImage && <small className="error">{errors.mainImage}</small>}
       </section>
