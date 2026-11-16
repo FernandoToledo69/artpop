@@ -18,6 +18,7 @@ require.extensions['.ts'] = (module, filename) => {
 const {
   appendAdditionalImages,
   appendProductImages,
+  getRemainingProductImageSlots,
   moveAdditionalImage,
   promoteAdditionalImage,
   selectProductImageFiles,
@@ -150,6 +151,9 @@ test('usa a primeira imagem selecionada como principal e mantém até quatro fot
     selectProductImageFiles(files, 3, true).map((file) => file.name),
     ['photo-1.png'],
   );
+  assert.equal(getRemainingProductImageSlots('', 0), 5);
+  assert.equal(getRemainingProductImageSlots('main', 4), 0);
+  assert.equal(getRemainingProductImageSlots('main', 3), 1);
   assert.deepEqual(appendProductImages('', [], ['photo-1', 'photo-2', 'photo-3']), {
     mainImage: 'photo-1',
     additionalImages: ['photo-2', 'photo-3'],
