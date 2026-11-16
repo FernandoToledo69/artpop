@@ -4,7 +4,7 @@ import { ChangeEvent, FormEvent, useState } from 'react';
 import { createProduct } from '../../services/api/produtos.service';
 import { getCurrentUser } from '../../services/api/auth.service';
 import { ProductDraft } from '../../types/produto';
-import { appendProductImages, MAX_ADDITIONAL_IMAGES, moveAdditionalImage, promoteAdditionalImage, selectProductImageFiles, validateProductDraft } from './product-announcement';
+import { appendProductImages, getRemainingProductImageSlots, moveAdditionalImage, promoteAdditionalImage, selectProductImageFiles, validateProductDraft } from './product-announcement';
 
 const initialDraft: ProductDraft = {
   title: '',
@@ -105,7 +105,7 @@ export default function ProductAnnouncementForm() {
     setIsSaving(false);
   }
 
-  const remainingAdditionalImages = MAX_ADDITIONAL_IMAGES - draft.additionalImages.length;
+  const remainingImages = getRemainingProductImageSlots(draft.mainImage, draft.additionalImages.length);
 
   return (
     <form className="announcement-form" onSubmit={handleSubmit} noValidate>
@@ -144,7 +144,7 @@ export default function ProductAnnouncementForm() {
             {draft.mainImage ? <img src={draft.mainImage} alt="Prévia da foto principal" /> : <><span className="upload-icon">+</span><strong>Adicionar foto principal</strong><span>JPG ou PNG · até 5 MB</span></>}
             <input type="file" accept="image/png,image/jpeg" onChange={handleMainImage} />
           </label>
-          <div className="additional-upload"><p>Outras fotos <span>(opcional)</span></p><label className="secondary-upload"><span>+</span> {remainingAdditionalImages === 0 ? 'Limite de 4 fotos atingido' : remainingAdditionalImages === 1 ? 'Adicionar mais 1 foto' : `Adicionar até ${remainingAdditionalImages} fotos`}<input type="file" accept="image/png,image/jpeg" multiple disabled={remainingAdditionalImages === 0} onChange={handleAdditionalImages} /></label><p className="image-order-help">A primeira foto adicionada vira a principal. Reordene as demais ou escolha outra como principal.</p><div className="thumbnail-row">{draft.additionalImages.map((image, index) => <div className="thumbnail-item" key={`${image}-${index}`}><img src={image} alt={`Prévia da foto ${index + 2}`} /><div className="thumbnail-actions"><button type="button" onClick={() => reorderAdditionalImage(index, -1)} disabled={index === 0} aria-label={`Mover foto ${index + 2} para antes`}>↑</button><button type="button" onClick={() => reorderAdditionalImage(index, 1)} disabled={index === draft.additionalImages.length - 1} aria-label={`Mover foto ${index + 2} para depois`}>↓</button><button type="button" onClick={() => makeMainImage(index)}>Tornar principal</button></div></div>)}</div></div>
+          <div className="additional-upload"><p>Outras fotos <span>(opcional, até 5 fotos no total)</span></p><label className="secondary-upload"><span>+</span> {remainingImages === 0 ? 'Limite de 5 fotos atingido' : remainingImages === 1 ? 'Adicionar mais 1 foto' : `Adicionar até ${remainingImages} fotos`}<input type="file" accept="image/png,image/jpeg" multiple disabled={remainingImages === 0} onChange={handleAdditionalImages} /></label><p className="image-order-help">A primeira foto adicionada vira a principal. Reordene as demais ou escolha outra como principal.</p><div className="thumbnail-row">{draft.additionalImages.map((image, index) => <div className="thumbnail-item" key={`${image}-${index}`}><img src={image} alt={`Prévia da foto ${index + 2}`} /><div className="thumbnail-actions"><button type="button" onClick={() => reorderAdditionalImage(index, -1)} disabled={index === 0} aria-label={`Mover foto ${index + 2} para antes`}>↑</button><button type="button" onClick={() => reorderAdditionalImage(index, 1)} disabled={index === draft.additionalImages.length - 1} aria-label={`Mover foto ${index + 2} para depois`}>↓</button><button type="button" onClick={() => makeMainImage(index)}>Tornar principal</button></div></div>)}</div></div>
         </div>
         {errors.mainImage && <small className="error">{errors.mainImage}</small>}
       </section>

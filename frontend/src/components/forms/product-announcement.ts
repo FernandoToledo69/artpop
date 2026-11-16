@@ -1,6 +1,11 @@
 import { ProductDraft } from '../../types/produto';
 
-export const MAX_ADDITIONAL_IMAGES = 4;
+export const MAX_PRODUCT_IMAGES = 5;
+export const MAX_ADDITIONAL_IMAGES = MAX_PRODUCT_IMAGES - 1;
+
+export function getRemainingProductImageSlots(mainImage: string, additionalImageCount: number): number {
+  return Math.max(0, MAX_PRODUCT_IMAGES - additionalImageCount - (mainImage ? 1 : 0));
+}
 
 export function selectAdditionalImageFiles(files: readonly File[], currentCount = 0): File[] {
   return files
@@ -13,10 +18,10 @@ export function selectProductImageFiles(
   currentAdditionalCount = 0,
   hasMainImage = false,
 ): File[] {
-  const availableSlots = MAX_ADDITIONAL_IMAGES - currentAdditionalCount + (hasMainImage ? 0 : 1);
+  const availableSlots = getRemainingProductImageSlots(hasMainImage ? 'main' : '', currentAdditionalCount);
   return files
     .filter((file) => file.type.startsWith('image/'))
-    .slice(0, Math.max(0, availableSlots));
+    .slice(0, availableSlots);
 }
 
 export function appendAdditionalImages(currentImages: readonly string[], newImages: readonly string[]): string[] {
