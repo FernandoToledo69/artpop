@@ -8,7 +8,7 @@ O artpop organiza em uma vitrine digital obras autorais de diferentes categorias
 
 A aplicação resolve o problema da pouca visibilidade de pequenos produtores e da dificuldade de encontrar arte local em um único lugar. Ao reunir catálogo, contexto sobre a peça e informações do artesão, o projeto facilita a descoberta e valoriza o trabalho manual.
 
-> **Estado atual:** a experiência funcional disponível é um protótipo frontend com Fake API estruturada via `localStorage` e dados mockados. O backend, banco de dados e integrações listados na estrutura do projeto ainda não possuem implementação executável.
+> **Estado atual:** o frontend mantém compatibilidade com a Fake API durante o desenvolvimento, enquanto o backend REST com PostgreSQL, Prisma e autenticação JWT já possui implementação executável. A integração final depende da configuração do banco e das variáveis de ambiente.
 
 ## Integrantes
 
@@ -37,7 +37,7 @@ A aplicação resolve o problema da pouca visibilidade de pequenos produtores e 
 
 ### Estrutura prevista
 
-O diretório `backend/` contém pastas preparadas para controllers, services, repositories, Prisma, autenticação, cache, filas, validação e documentação Swagger. Porém, os arquivos dessa camada estão vazios no estado atual. Portanto, não há banco de dados, autenticação, Redis, filas ou API REST funcionando para configurar ou consumir.
+O diretório `backend/` contém uma API REST em Express, Prisma ORM, PostgreSQL, autenticação JWT, autorização por papel e documentação OpenAPI. Cache, filas e integrações externas continuam opcionais e não são requisitos básicos desta entrega.
 
 ## Como executar localmente
 
@@ -63,7 +63,19 @@ npm start
 
 ### Backend
 
-O backend ainda não possui `package.json`, scripts ou código executável. Por isso, não há um comando de inicialização disponível nesta versão. A estrutura está reservada para a implementação futura da API.
+Pré-requisitos: Node.js 18+ e PostgreSQL.
+
+```bash
+cd backend
+copy .env.example .env
+npm install
+npm run prisma:generate
+npm run prisma:migrate
+npm run prisma:seed
+npm run dev
+```
+
+A API ficará disponível em `http://localhost:3333`. O PostgreSQL pode ser iniciado com `docker compose up -d postgres`.
 
 ## Variáveis de ambiente
 
@@ -200,7 +212,7 @@ No PowerShell, o mesmo comando pode ser executado a partir do diretório `fronte
 
 ## Rotas da API
 
-Não há endpoints HTTP implementados nesta versão. As pastas e arquivos de controllers, services e routes em `backend/src/` são apenas a estrutura planejada.
+Os endpoints HTTP estão implementados em `backend/src/routes/`. O catálogo, autenticação, carrinho, artesãos, pedidos, avaliações, recomendações e administração estão disponíveis sob o prefixo `/api`.
 
 As operações atualmente disponíveis acontecem no cliente:
 
@@ -239,7 +251,7 @@ O repositório possui [netlify.toml](netlify.toml) e usa `@netlify/plugin-nextjs
 - Publish directory: `.next`
 - Package directory: deixar vazio
 
-Após alterar as configurações, execute um novo deploy limpando o cache do build. O backend ainda não é necessário para demonstrar os fluxos, pois a aplicação usa a Fake API local.
+Após alterar as configurações, execute um novo deploy limpando o cache do build. Configure `NEXT_PUBLIC_API_URL` no frontend para ativar a integração REST; sem ela, a Fake API local continua disponível como fallback.
 
 ## Documentação do projeto
 

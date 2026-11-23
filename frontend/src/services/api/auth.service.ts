@@ -1,4 +1,5 @@
 import { AccountRecord, AuthUser, UserRole } from '../../types/auth';
+import { apiFetch, setApiToken } from './client';
 
 const ACCOUNTS_KEY = 'origem:accounts';
 const SESSION_KEY = 'origem:session';
@@ -69,6 +70,19 @@ export function getCurrentUser(): AuthUser | null {
 }
 
 export async function login(email: string, password: string): Promise<AuthUser> {
+  try {
+    const response = await apiFetch<{ token: string; user: AuthUser }>('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+    setApiToken(response.token);
+    const user = { ...response.user, expiresAt: Date.now() + 8 * 60 * 60 * 1000 };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    window.dispatchEvent(new Event('auth-updated'));
+    return user;
+  } catch (error) {
+    if (!(error instanceof TypeError) && !(error instanceof Error && error.message === 'A URL da API ainda não foi configurada.')) throw error;
+  }
   const attempts = JSON.parse(localStorage.getItem(LOGIN_ATTEMPTS_KEY) ?? '{"count":0,"lockedUntil":0}') as { count: number; lockedUntil: number };
   if (attempts.lockedUntil > Date.now()) throw new Error('Muitas tentativas. Aguarde um minuto e tente novamente.');
   const accounts = await readAccounts();
@@ -87,6 +101,19 @@ export async function login(email: string, password: string): Promise<AuthUser> 
 }
 
 export async function register(name: string, email: string, password: string, phone: string, cpf: string, role: UserRole = 'buyer'): Promise<AuthUser> {
+  try {
+    const response = await apiFetch<{ token: string; user: AuthUser }>('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password, phone, cpf, role }),
+    });
+    setApiToken(response.token);
+    const user = { ...response.user, expiresAt: Date.now() + 8 * 60 * 60 * 1000 };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    window.dispatchEvent(new Event('auth-updated'));
+    return user;
+  } catch (error) {
+    if (!(error instanceof TypeError) && !(error instanceof Error && error.message === 'A URL da API ainda não foi configurada.')) throw error;
+  }
   const accounts = await readAccounts();
   if (accounts.some((item) => normalizeEmail(item.email) === normalizeEmail(email))) throw new Error('Este e-mail já está cadastrado.');
   if (!isValidCpf(cpf)) throw new Error('Informe um CPF válido.');
@@ -98,6 +125,7 @@ export async function register(name: string, email: string, password: string, ph
 }
 
 export function logout(): void {
+  setApiToken(null);
   localStorage.removeItem(SESSION_KEY);
   window.dispatchEvent(new Event('auth-updated'));
   window.dispatchEvent(new Event('cart-updated'));
