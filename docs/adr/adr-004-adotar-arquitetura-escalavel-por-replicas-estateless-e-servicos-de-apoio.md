@@ -2,9 +2,9 @@
 
 - **Status:** Proposta
 - **Data:** 2026-11-23
-- **Autor:** Michel Serpa
-- **Turma:** Embarque Digital
-- **Projeto:** artpop · marketplace da economia criativa e do artesanato de Pernambuco
+- **Autor:** MICHEL DOS SANTOS SERPA (mss8@cesar.school)
+- **Turma:** Embarque (segundas)
+- **Projeto:** Origem · marketplace da economia criativa e do artesanato de Pernambuco
 
 ## Contexto
 
@@ -38,16 +38,14 @@ A abordagem atende ao crescimento esperado sem adotar microsserviços no estági
 
 ## Consequências
 
-### Benefícios
-
-- Permite aumentar a capacidade adicionando réplicas da API ou trabalhadores das filas.
+Benefícios
+- Aumentar a capacidade adicionando réplicas da API ou trabalhadores das filas.
 - Mantém a resposta a requisições HTTP independente da origem da instância que recebe o acesso.
 - Reduz consultas repetidas ao banco por meio de cache compartilhado.
 - Remove processamento pesado do caminho síncrono das requisições.
 - Facilita testes de carga, observabilidade e implantação progressiva.
 
-### Custos e compromissos
-
+Custos e compromissos
 - Introduz latência de rede em cada operação entre navegador e API.
 - Exige um balanceador de carga e a execução de múltiplas instâncias da API.
 - Faz da API e do PostgreSQL compartilhado pontos centrais de contenção e de falha.
@@ -57,28 +55,21 @@ A abordagem atende ao crescimento esperado sem adotar microsserviços no estági
 - O PostgreSQL pode tornar-se o próximo gargalo quando o volume de escritas ou transações crescer.
 - A infraestrutura adicionada aumenta os custos operacionais e exige monitoramento, versionamento e testes de recuperação.
 
-Em situações de falha do Redis, a API deve continuar funcionando consultando o PostgreSQL. Em tarefas enfileiradas, falhas devem gerar novas tentativas controladas, sem perda silenciosa das mensagens.
-
 ## Alternativas consideradas
 
-### Escala vertical
-
+Escala vertical
 Manter uma única instância da API e aumentar recursos da máquina poderia atender cargas iniciais com menor complexidade. A alternativa foi parcialmente aceita como medida temporária, mas não é suficiente como estratégia principal: a capacidade continuará limitada por um único nó e por eventuais reinícios ou falhas.
 
-### Microsserviços desde o início
-
+Microsserviços desde o início
 Separar catálogo, pedidos, estoque e usuários em serviços independentes permitiria escalamento específico de cada domínio. Entretanto, dividir o sistema nesta etapa exigiria integração, observabilidade distribuída, automação de implantação e operação de múltiplos bancos ou contratos. Considerando o tamanho da equipe e os recursos disponíveis, essa complexidade não é justificável.
 
-### Orientado a Eventos como padrão principal
-
+Orientado a Eventos como padrão principal
 Foi considerado para processamento assíncrono de imagens e atualização de indicadores, pois permitiria publicar eventos e adicionar consumidores sem alterar o fluxo principal. Porém, adotá-lo como padrão central acrescentaria consistência eventual, barramentos ou filas, rastreabilidade distribuída e maior dificuldade de depuração para um projeto que ainda não precisa dessa desacoplamento em todo o domínio.
 
-### CQRS
-
+CQRS
 Foi descartado porque o volume atual não justifica separar modelos de leitura e escrita ou manter uma projeção quase sempre assíncrona. Essa alternativa duplicaria modelos e bases de dados, além de introduzir consistência eventual no catálogo.
 
-### Replicação da API sem cache ou filas
-
+Replicação da API sem cache ou filas
 Replicar a API apenas distribuindo requisições reduziria parte da carga, mas manteria consultas repetidas no PostgreSQL e impediria o processamento assíncrono de tarefas pesadas. Por isso, cache e filas podem ser adotados como componentes de apoio ao padrão Cliente-servidor.
 
 ## Rastreabilidade
@@ -87,50 +78,29 @@ Replicar a API apenas distribuindo requisições reduziria parte da carga, mas m
 
 **Cenário que originou a decisão:**
 
-> Durante uma operação normal de publicidade, uma campanha promocional aumenta o número de requisições ao catálogo de 50 para 500 requisições por segundo em até 10 minutos. O backend do Projeto Origem recebe a carga por múltiplas instâncias atrás de um balanceador, mantém pelo menos 95% das respostas do catálogo entre 200 ms e 800 ms e mantém o percentual de erros HTTP 5xx abaixo de 1%, durante 30 minutos de teste.
+> Durante uma campanha promocional, o número de requisições ao catálogo aumenta de 50 para 500 requisições por segundo em até 10 minutos. A API REST do Origem distribui a carga entre múltiplas instâncias, atendendo pelo menos 95% das respostas entre 200 ms e 800 ms e mantendo a taxa de erros HTTP 5xx abaixo de 1% durante 30 minutos.
 
 **Padrão arquitetural adotado:** Cliente-servidor
 
 **Táticas empacotadas:** Centralizar regra e dado no servidor; Autenticar e autorizar na borda; Limitar a exposição da API; Replicar o servidor para escalar
 
-**Fluxo funcional:** Navegação e busca no catálogo, publicação de produtos, processamento de imagens e atualização de indicadores.
 
-**Módulos relacionados:**
-
-- `backend/src/app.ts`
-- `backend/src/server.ts`
-- `backend/src/routes/produtos.routes.ts`
-- `backend/src/services/produtos.service.ts`
-- `backend/src/repositories/produtos.repository.ts`
-- `backend/src/cache/catalog.cache.ts`
-- `backend/src/cache/redis.client.ts`
-- `backend/src/jobs/processImages.job.ts`
-- `backend/src/jobs/updateIndicators.job.ts`
-- `backend/src/queues/order.queue.ts`
-- `backend/src/queues/notification.queue.ts`
-- `backend/src/database/prisma/schema.prisma`
-- `docker-compose.yml`
 
 ## Verificação
 
-Executar um teste de carga automatizado com carga progressiva contra o ambiente de homologação:
+- **Teste do cenário:** Ambiente: utilizar homologação, não apenas executar manualmente no navegador.
+Carga inicial: enviar 50 requisições por segundo durante 5 minutos.
+Aumento: subir gradualmente até 500 requisições por segundo em 10 minutos.
+Pico: manter 500 requisições por segundo por 30 minutos.
+Operação: pesquisar e listar produtos no catálogo.
+Replicas: executar pelo menos duas instâncias da API.
+Métricas: coletar latência p95, erros 5xx, CPU, memória e consultas ao PostgreSQL.
 
-1. iniciar pelo menos duas réplicas da API;
-2. executar busca e listagem do catálogo com 50 requisições por segundo durante 5 minutos;
-3. aumentar para 500 requisições por segundo durante 10 minutos;
-4. manter 500 requisições por segundo por mais 30 minutos;
-5. coletar latência p95, taxa de erros 5xx, utilização de CPU e memória, consultas ao banco e taxa de acerto do cache;
-6. remover uma réplica durante a carga e verificar se o balanceador redistribui as requisições sem interrupção do catálogo;
-7. derrubar temporariamente o Redis e confirmar que as operações do catálogo continuam disponíveis via PostgreSQL;
-8. enviar trabalhos de processamento de imagens e verificar que a fila completa os itens sem aumentar significativamente a latência das requisições HTTP.
-
-### Critérios de aceite
-
-- Pelo menos 95% das respostas do catálogo devem ficar entre 200 ms e 800 ms.
-- A taxa de erros HTTP 5xx deve permanecer abaixo de 1%.
-- Nenhum trabalho enfileirado deve ser perdido após uma falha controlada do consumidor.
-- A remoção de uma réplica não deve interromper o catálogo.
-- O cache não deve ser obrigatório para o funcionamento das operações críticas.
+A decisão é considerada confirmada se:
+pelo menos 95% das respostas forem concluídas entre 200 ms e 800 ms;
+menos de 1% das respostas forem erros HTTP 5xx;
+o PostgreSQL não ficar sobrecarregado além do limite operacional definido;
+retirar uma réplica durante o teste não interromper o sistema nem impedir o balanceador de redistribuir a carga.
 
 ---
 
