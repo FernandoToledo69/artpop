@@ -14,10 +14,10 @@ A aplicação resolve o problema da pouca visibilidade de pequenos produtores e 
 
 | Integrante | Perfil | Foto |
 | --- | --- | --- |
-| Davi Lucas Da Silva Pinheiro| [github.com/davi081dev](https://github.com/davi081dev) | [![Davi Lucas](https://github.com/davi081dev.png?size=96)](https://github.com/davi081dev) |
-| Hugo Mendonça | [github.com/BRKHugz](https://github.com/BRKHugz) | [![Hugo Vinicius de Lima Mendonça ](https://github.com/BRKHugz.png?size=96)](https://github.com/BRKHugz) |
-| Luiz Fernando Ramos de Toledo | [github.com/FernandoToledo69](https://github.com/FernandoToledo69) | [![Luiz Fernando Ramos de Toledo](https://github.com/FernandoToledo69.png?size=96)](https://github.com/FernandoToledo69) |
-| Michel dos Santos Serpa | [github.com/serpamichel](https://github.com/serpamichel) | [![Michel dos Santos Serpa](https://github.com/serpamichel.png?size=96)](https://github.com/serpamichel) |
+| Davi Lucas Da Silva Pinheiro| [github.com/davi081dev](https://github.com/davi081dev) | <a href="https://github.com/davi081dev"><img src="https://github.com/davi081dev.png?size=96" width="96" height="96" alt="Davi Lucas"></a> |
+| Hugo Mendonça | [github.com/BRKHugz](https://github.com/BRKHugz) | <a href="https://github.com/BRKHugz"><img src="https://github.com/BRKHugz.png?size=96" width="96" height="96" alt="Hugo Vinicius de Lima Mendonça"></a> |
+| Luiz Fernando Ramos de Toledo | [github.com/FernandoToledo69](https://github.com/FernandoToledo69) | <a href="https://github.com/FernandoToledo69"><img src="https://github.com/FernandoToledo69.png?size=96" width="96" height="96" alt="Luiz Fernando Ramos de Toledo"></a> |
+| Michel dos Santos Serpa | [github.com/serpamichel](https://github.com/serpamichel) | <a href="https://github.com/serpamichel"><img src="https://github.com/serpamichel.png?size=96" width="96" height="96" alt="Michel dos Santos Serpa"></a> |
 
 ### Equipe das disciplinas de Algoritmos e Estruturas de Dados e Infraestrutura de Software
 
@@ -25,8 +25,8 @@ Disciplinas ministradas pelo Professor David Cunha.
 
 | Integrante | Perfil | Foto |
 | --- | --- | --- |
-| injuje | [github.com/injuje](https://github.com/injuje) | [![injuje](https://github.com/injuje.png?size=96)](https://github.com/injuje) |
-| FelipeLV12 | [github.com/FelipeLV12](https://github.com/FelipeLV12) | [![FelipeLV12](https://github.com/FelipeLV12.png?size=96)](https://github.com/FelipeLV12) |
+| injuje | [github.com/injuje](https://github.com/injuje) | <a href="https://github.com/injuje"><img src="https://github.com/injuje.png?size=96" width="96" height="96" alt="injuje"></a> |
+| FelipeLV12 | [github.com/FelipeLV12](https://github.com/FelipeLV12) | <a href="https://github.com/FelipeLV12"><img src="https://github.com/FelipeLV12.png?size=96" width="96" height="96" alt="FelipeLV12"></a> |
 
 ## Tecnologias utilizadas
 
