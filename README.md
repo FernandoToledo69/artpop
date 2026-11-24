@@ -94,7 +94,7 @@ Para usar o arquivo localmente, copie-o para `.env.local` dentro de `frontend/`:
 copy ..\.env.example .env.local
 ```
 
-No PowerShell, o mesmo comando pode ser executado a partir do diretório `frontend`. A variável ainda não é consumida pelos serviços atuais.
+No PowerShell, o mesmo comando pode ser executado a partir do diretório `frontend`. Com `NEXT_PUBLIC_API_URL` configurada, a seção de recomendações na página de produto consulta a API REST. Sem ela, o protótipo continua usando os dados locais.
 
 ## Funcionalidades implementadas
 
@@ -229,7 +229,83 @@ As operações atualmente disponíveis acontecem no cliente:
 | Criar pedido | `pedidos.service.ts` | `localStorage` (`origem:orders`), somente autenticado |
 | Pix e métodos de pagamento | `PaymentForm.tsx` / `pedidos.service.ts` | Simulação local e QR Code externo |
 
-Quando a API for implementada, esta seção deve ser atualizada com endpoints, autenticação, parâmetros e exemplos reais de requisição e resposta.
+O endpoint de recomendações é consumido pela página de produto quando a URL da API está configurada. A seção do Projeto Integrador abaixo documenta a comunicação e o benchmark.
+
+## Projeto Integrador — Parte 2 (Unidade 2)
+
+### Arquitetura distribuída
+
+```mermaid
+flowchart LR
+  Browser["Frontend Next.js"]
+  API["Backend Express REST<br/>Rotas por domínio"]
+  DB[("PostgreSQL<br/>Prisma")]
+  Reco["Recommendation Service<br/>HTTP :3334"]
+  Workers["Worker Threads<br/>pontuacao paralela"]
+
+  Browser -->|"GET /api/recomendacoes?productId=..."| API
+  API -->|"consulta catalogo"| DB
+  API -->|"POST /recommendations<br/>JSON: produto-base + candidatos"| Reco
+  Reco -->|"divide candidatos"| Workers
+  Workers -->|"pontuacoes"| Reco
+  Reco -->|"IDs ordenados + score"| API
+  API -->|"lista de produtos"| Browser
+```
+
+- **Frontend:** apresenta o catálogo e solicita recomendações ao backend via HTTP; o restante do protótipo continua compatível com a Fake API.
+- **Backend REST:** mantém rotas e regras de domínio, consulta o catálogo no PostgreSQL e monta a resposta pública. Não executa o cálculo CPU-bound.
+- **Recommendation Service:** processo independente e sem estado persistente; recebe os dados necessários por HTTP, calcula similaridade por categoria, texto, faixa de preço e artesão, e devolve os IDs ranqueados. Pode ser escalado sem replicar a API nem dar acesso ao banco.
+- **Worker Threads:** paralelizam o cálculo em blocos e ficam aquecidas entre requisições. São paralelismo dentro do serviço, não microsserviços adicionais.
+- **PostgreSQL:** continua sendo a fonte de verdade; o serviço de recomendação não acessa o banco diretamente.
+
+O frontend usa `GET /api/recomendacoes?productId=<id>` quando `NEXT_PUBLIC_API_URL` está definida. O backend chama o serviço por `POST /recommendations`; a URL pode ser configurada em `RECOMMENDATION_SERVICE_URL` (padrão local `http://127.0.0.1:3334`). Configure `RECOMMENDATION_HOST` e `RECOMMENDATION_PORT` para a implantação.
+
+### Onde está implementado
+
+- Cliente HTTP entre backend e serviço: [`backend/src/integrations/recommendation.client.ts`](backend/src/integrations/recommendation.client.ts).
+- Endpoint REST do catálogo: [`backend/src/routes/recomendacoes.routes.ts`](backend/src/routes/recomendacoes.routes.ts).
+- Servidor de recomendações: [`backend/src/recommendation-service/server.ts`](backend/src/recommendation-service/server.ts).
+- Distribuição da pontuação em workers: [`backend/src/recommendation-service/scoring.ts`](backend/src/recommendation-service/scoring.ts) e [`backend/src/recommendation-service/scoring.worker.ts`](backend/src/recommendation-service/scoring.worker.ts).
+- Integração na página de produto: [`frontend/src/services/api/recomendacoes.services.ts`](frontend/src/services/api/recomendacoes.services.ts) e [`frontend/src/components/marketplace/ProductDetail.tsx`](frontend/src/components/marketplace/ProductDetail.tsx).
+- Benchmark reproduzível: [`backend/src/scripts/benchmark-recommendations.ts`](backend/src/scripts/benchmark-recommendations.ts).
+
+### Como executar e conferir a comunicação
+
+Inicie o PostgreSQL com `docker compose up -d postgres`. Depois, com o PostgreSQL disponível, inicie o serviço de recomendação e a API em terminais separados:
+
+```powershell
+cd backend
+copy .env.example .env
+npm ci
+npm run prisma:generate
+npm run prisma:deploy
+npm run build
+npm run start:recommendations
+```
+
+Em outro terminal, inicie a API (`npm run dev`, ainda em `backend`) e configure `NEXT_PUBLIC_API_URL=http://localhost:3333` em `frontend/.env.local`. Ao abrir uma página de produto, a interface chama a rota REST e o backend chama o serviço de recomendação. O benchmark abaixo também executa chamadas HTTP reais usando o mesmo cliente de integração do backend; ele não exige banco de dados.
+
+### Metodologia e resultados do benchmark
+
+Após `npm ci` e `npm run prisma:generate` em `backend/`, execute `npm run benchmark:recommendations`. O comando compila e executa o serviço em uma porta local aleatória, sem exigir PostgreSQL. O script envia **40.000 produtos sintéticos** por HTTP e solicita as mesmas oito recomendações em modo sequencial e paralelo. Há uma chamada de aquecimento por modo e cinco repetições medidas; a ordem alterna entre repetições. A latência HTTP é medida com `performance.now()` em torno da chamada `fetch` (inclui serialização JSON, ida e volta local e processamento). O próprio serviço também mede o tempo de pontuação, excluindo o transporte HTTP. Comparamos a mediana das cinco medições; os IDs recomendados precisam ser iguais nos dois modos. O throughput concorrente não foi medido.
+
+Execução nesta máquina: Windows x64, Node.js v24.11.1, 12 CPUs lógicas, quatro workers. Resultado observado:
+
+| Modo | Latência HTTP mediana | Pontuação mediana | Ganho |
+|---|---:|---:|---:|
+| Sequencial (1 worker) | 549,20 ms | 273,86 ms | referência |
+| Paralelo (4 workers) | 491,67 ms | 187,32 ms | 1,12× HTTP; 1,46× na pontuação |
+
+O trecho paralelo reduz o tempo de pontuação em aproximadamente **31,6%**; a resposta HTTP completa melhora **10,5%**. A diferença ocorre porque a transferência e serialização do catálogo também consomem tempo e não são paralelizadas. Em catálogos pequenos, esse custo pode superar o benefício de dividir o trabalho; a separação foi escolhida para isolar e escalar o cálculo quando o volume de candidatos cresce. Os tempos são uma medição local e não representam uma garantia de produção.
+
+O benchmark registra a comunicação executada, por exemplo:
+
+```text
+HTTP GET /health -> 200 ok; worker slots=4
+HTTP POST /recommendations -> 200 mode=sequential; repeticao=1/5
+HTTP POST /recommendations -> 200 mode=parallel; workers=4
+Resultados equivalentes: sim (8 recomendacoes).
+```
 
 ## Deploy
 
