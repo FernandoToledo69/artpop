@@ -7,7 +7,7 @@ import { Product } from '../../types/produto';
 import { demoProducts } from '../../mocks/products';
 import { addToCart } from '../../services/api/carrinho.service';
 import ShippingCalculator from '../carrinho/ShippingCalculator';
-import { readRelatedProducts } from '../../services/api/recomendacoes.services';
+import { fetchRelatedProducts } from '../../services/api/recomendacoes.services';
 import ProfileAvatar from '../ui/ProfileAvatar';
 
 const stories: Record<string, string> = {
@@ -28,11 +28,27 @@ export default function ProductDetail({ productId }: { productId: string }) {
   const [cartMessage, setCartMessage] = useState('');
   const [activeImage, setActiveImage] = useState(0);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [recommendationError, setRecommendationError] = useState(false);
 
   useEffect(() => {
     const foundProduct = readCatalogProducts().find((item) => item.id === productId);
     setProduct(foundProduct ?? null);
     setActiveImage(0);
+    setRelatedProducts([]);
+    setRecommendationError(false);
+    if (!foundProduct) return;
+
+    let active = true;
+    fetchRelatedProducts(foundProduct, 3).then((products) => {
+      if (active) setRelatedProducts(products);
+    }).catch((error: unknown) => {
+      console.error('Failed to load related products:', error);
+      if (active) setRecommendationError(true);
+    });
+    return () => {
+      active = false;
+    };
   }, [productId]);
 
   function handleApplause() {
@@ -120,7 +136,7 @@ export default function ProductDetail({ productId }: { productId: string }) {
           persistSelection={false}
         />}
       </div>
-      <section className="artist-story"><p className="eyebrow">QUEM FAZ</p><h2>{artisanName}</h2><p className="artist-location">{product.artisanCity}</p><p>{story}</p><a href={`/artesoes/${artisanName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>Conhecer perfil do artesão</a></section><section className="catalog-section"><div className="catalog-heading"><div><p className="eyebrow">VOCÊ TAMBÉM PODE GOSTAR</p><h2>Outras criações</h2></div></div><div className="marketplace-grid">{relatedProducts.map((item) => <a className="marketplace-card" href={`/produtos/${item.id}`} key={item.id}><div className="product-image">{item.mainImage ? <img src={item.mainImage} alt="" /> : <span aria-hidden="true">artpop</span>}</div><div className="product-info"><h3>{item.title}</h3><p>{item.technique}</p><strong>R$ {item.price.toFixed(2).replace('.', ',')}</strong></div></a>)}</div></section>
+      <section className="artist-story"><p className="eyebrow">QUEM FAZ</p><h2>{artisanName}</h2><p className="artist-location">{product.artisanCity}</p><p>{story}</p><a href={`/artesoes/${artisanName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>Conhecer perfil do artesão</a></section><section className="catalog-section"><div className="catalog-heading"><div><p className="eyebrow">VOCÊ TAMBÉM PODE GOSTAR</p><h2>Outras criações</h2></div></div>{recommendationError && <p role="status">Não foi possível carregar recomendações agora.</p>}<div className="marketplace-grid">{relatedProducts.map((item) => <a className="marketplace-card" href={`/produtos/${item.id}`} key={item.id}><div className="product-image">{item.mainImage ? <img src={item.mainImage} alt="" /> : <span aria-hidden="true">artpop</span>}</div><div className="product-info"><h3>{item.title}</h3><p>{item.technique}</p><strong>R$ {item.price.toFixed(2).replace('.', ',')}</strong></div></a>)}</div></section>
       <section className="review-section"><div><p className="eyebrow">COMUNIDADE</p><h2>Deixe sua impressão</h2><p>Compartilhe o que essa obra despertou em você.</p></div><form onSubmit={handleComment}><div className="review-author"><ProfileAvatar className="review-avatar" label="Foto do seu perfil" /><strong>LG</strong></div><textarea value={comment} onChange={(event) => { setComment(event.target.value); setCommentSaved(false); }} placeholder="Escreva um comentário ou avaliação" rows={4} aria-label="Comentário ou avaliação" /><button type="submit">Publicar comentário</button>{commentSaved && <small role="status">Seu comentário foi publicado.</small>}</form></section>
     </div>
   );

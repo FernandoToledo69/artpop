@@ -1,6 +1,10 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 const TOKEN_KEY = 'origem:api-token';
 
+export function isApiConfigured(): boolean {
+	return Boolean(API_URL);
+}
+
 export function getApiToken(): string | null {
 	if (typeof window === 'undefined') return null;
 	return window.sessionStorage.getItem(TOKEN_KEY);
