@@ -1,0 +1,16 @@
+﻿Artpop - log real da comunicacao HTTP
+Data: 
+2026-11-24 18:47:20
+
+GET /health
+HTTP 
+200
+{"status":"ok","workers":4}
+
+POST /recommendations (mode=parallel)
+HTTP 
+200
+{"recommendations":[{"id":"a","score":86.66666666666667},{"id":"b","score":27.083333333333336}],"durationMs":101.392,"workerCount":2,"mode":"parallel"}
+
+Payload enviado:
+{"base":{"id":"base","title":"vaso ceramica recife","category":"CERAMICA","technique":"ceramica","description":"vaso artesanal de barro","price":120,"artisanId":"artisan-1"},"candidates":[{"id":"a","title":"vaso ceramica","category":"CERAMICA","technique":"ceramica","description":"barro recife","price":100,"artisanId":"artisan-2"},{"id":"b","title":"tecido","category":"TEXTIL","technique":"bordado","description":"tecido artesanal","price":80,"artisanId":"artisan-3"}],"limit":2,"mode":"parallel"}

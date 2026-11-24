@@ -44,3 +44,12 @@ npm run benchmark:recommendations
 ```
 
 O log da execucao de benchmark esta em [benchmark-recomendacoes.md](benchmark-recomendacoes.md).
+
+## Evidencia HTTP capturada
+
+Uma execucao real dos dois endpoints foi registrada em [comunicacao-http.log](comunicacao-http.log). O arquivo mostra:
+
+```text
+GET /health -> HTTP 200
+POST /recommendations (mode=parallel) -> HTTP 200
+```
