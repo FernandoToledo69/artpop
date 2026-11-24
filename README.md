@@ -307,10 +307,10 @@ Execução nesta máquina: Windows x64, Node.js v24.14.0, 12 CPUs lógicas, quat
 
 | Modo | Latência HTTP mediana | Pontuação mediana | Ganho |
 |---|---:|---:|---:|
-| Sequencial (1 worker) | 1299,38 ms | 650,92 ms | referência |
-| Paralelo (4 workers) | 980,83 ms | 404,62 ms | 1,32× HTTP; 1,61× na pontuação |
+| Sequencial (1 worker) | 568,53 ms | 258,94 ms | referência |
+| Paralelo (4 workers) | 448,69 ms | 198,34 ms | 1,27× HTTP; 1,31× na pontuação |
 
-O trecho paralelo reduz o tempo de pontuação em aproximadamente **37,9%**; a resposta HTTP completa melhora **24,5%**. A diferença ocorre porque a transferência e serialização do catálogo também consomem tempo e não são paralelizadas. Em catálogos pequenos, esse custo pode superar o benefício de dividir o trabalho; a separação foi escolhida para isolar e escalar o cálculo quando o volume de candidatos cresce. Os tempos são uma medição local e não representam uma garantia de produção.
+O trecho paralelo reduz o tempo de pontuação em aproximadamente **23,4%**; a resposta HTTP completa melhora **21,1%**. A diferença ocorre porque a transferência e serialização do catálogo também consomem tempo e não são paralelizadas. Em catálogos pequenos, esse custo pode superar o benefício de dividir o trabalho; a separação foi escolhida para isolar e escalar o cálculo quando o volume de candidatos cresce. Os tempos são uma medição local e não representam uma garantia de produção.
 
 O benchmark registra a comunicação executada, por exemplo:
 
