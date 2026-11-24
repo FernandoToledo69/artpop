@@ -285,18 +285,32 @@ npm run start:recommendations
 
 Em outro terminal, inicie a API (`npm run dev`, ainda em `backend`) e configure `NEXT_PUBLIC_API_URL=http://localhost:3333` em `frontend/.env.local`. Ao abrir uma página de produto, a interface chama a rota REST e o backend chama o serviço de recomendação. O benchmark abaixo também executa chamadas HTTP reais usando o mesmo cliente de integração do backend; ele não exige banco de dados.
 
+Alternativamente, para subir PostgreSQL, backend e serviço de recomendação em uma rede única:
+
+```powershell
+docker compose up -d --build
+curl http://localhost:3333/health
+curl http://localhost:3334/health
+```
+
+Para encerrar os serviços:
+
+```powershell
+docker compose down
+```
+
 ### Metodologia e resultados do benchmark
 
 Após `npm ci` e `npm run prisma:generate` em `backend/`, execute `npm run benchmark:recommendations`. O comando compila e executa o serviço em uma porta local aleatória, sem exigir PostgreSQL. O script envia **40.000 produtos sintéticos** por HTTP e solicita as mesmas oito recomendações em modo sequencial e paralelo. Há uma chamada de aquecimento por modo e cinco repetições medidas; a ordem alterna entre repetições. A latência HTTP é medida com `performance.now()` em torno da chamada `fetch` (inclui serialização JSON, ida e volta local e processamento). O próprio serviço também mede o tempo de pontuação, excluindo o transporte HTTP. Comparamos a mediana das cinco medições; os IDs recomendados precisam ser iguais nos dois modos. O throughput concorrente não foi medido.
 
-Execução nesta máquina: Windows x64, Node.js v24.11.1, 12 CPUs lógicas, quatro workers. Resultado observado:
+Execução nesta máquina: Windows x64, Node.js v24.14.0, 12 CPUs lógicas, quatro workers. Resultado observado:
 
 | Modo | Latência HTTP mediana | Pontuação mediana | Ganho |
 |---|---:|---:|---:|
-| Sequencial (1 worker) | 549,20 ms | 273,86 ms | referência |
-| Paralelo (4 workers) | 491,67 ms | 187,32 ms | 1,12× HTTP; 1,46× na pontuação |
+| Sequencial (1 worker) | 1299,38 ms | 650,92 ms | referência |
+| Paralelo (4 workers) | 980,83 ms | 404,62 ms | 1,32× HTTP; 1,61× na pontuação |
 
-O trecho paralelo reduz o tempo de pontuação em aproximadamente **31,6%**; a resposta HTTP completa melhora **10,5%**. A diferença ocorre porque a transferência e serialização do catálogo também consomem tempo e não são paralelizadas. Em catálogos pequenos, esse custo pode superar o benefício de dividir o trabalho; a separação foi escolhida para isolar e escalar o cálculo quando o volume de candidatos cresce. Os tempos são uma medição local e não representam uma garantia de produção.
+O trecho paralelo reduz o tempo de pontuação em aproximadamente **37,9%**; a resposta HTTP completa melhora **24,5%**. A diferença ocorre porque a transferência e serialização do catálogo também consomem tempo e não são paralelizadas. Em catálogos pequenos, esse custo pode superar o benefício de dividir o trabalho; a separação foi escolhida para isolar e escalar o cálculo quando o volume de candidatos cresce. Os tempos são uma medição local e não representam uma garantia de produção.
 
 O benchmark registra a comunicação executada, por exemplo:
 
@@ -306,6 +320,8 @@ HTTP POST /recommendations -> 200 mode=sequential; repeticao=1/5
 HTTP POST /recommendations -> 200 mode=parallel; workers=4
 Resultados equivalentes: sim (8 recomendacoes).
 ```
+
+Os resultados brutos das repetições são registrados automaticamente em [`docs/evidencias/benchmark-recomendacoes.md`](docs/evidencias/benchmark-recomendacoes.md) após executar `npm run benchmark:recommendations`.
 
 ## Deploy
 

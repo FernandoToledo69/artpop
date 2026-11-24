@@ -7,14 +7,14 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "start:recommendations": "node dist/recommendation-service/server.js",
-    "benchmark:recommendations": "npm run build && node dist/scripts/benchmark-recommendations.js",
+    "benchmark:recommendations": "npm run prisma:generate && npm run build && node dist/scripts/benchmark-recommendations.js",
     "prisma:generate": "prisma generate --schema src/database/prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema src/database/prisma/schema.prisma",
     "prisma:deploy": "prisma migrate deploy --schema src/database/prisma/schema.prisma",
     "prisma:seed": "tsx src/database/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "^6.16.3",
+    "@prisma/client": "6.16.3",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
@@ -29,7 +29,7 @@
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.3.0",
-    "prisma": "^6.16.3",
+    "prisma": "6.16.3",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   },

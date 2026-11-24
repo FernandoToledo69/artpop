@@ -1,6 +1,8 @@
 import { cpus } from 'node:os';
 import { performance } from 'node:perf_hooks';
 import { AddressInfo } from 'node:net';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { RecommendationProduct, RecommendationMode } from '../recommendation-service/recommendation.types';
 import { startRecommendationService } from '../recommendation-service/server';
 import { requestRecommendations } from '../integrations/recommendation.client';
@@ -94,6 +96,12 @@ async function main(): Promise<void> {
       const parallelIds = JSON.stringify(parallel.recommendations.map(({ id }) => id));
       if (sequentialIds !== parallelIds) throw new Error('Sequential and parallel results differ.');
       expectedIds = sequentialIds;
+      console.log(
+        `Repeticao ${repetition + 1}: sequencial HTTP=${(sequentialTimes.at(-1) ?? 0).toFixed(2)}ms, `
+        + `pontuacao=${sequential.durationMs.toFixed(2)}ms; `
+        + `paralelo HTTP=${(parallelTimes.at(-1) ?? 0).toFixed(2)}ms, `
+        + `pontuacao=${parallel.durationMs.toFixed(2)}ms`,
+      );
       console.log(`HTTP POST /recommendations -> 200 mode=sequential; repeticao=${repetition + 1}/${repetitions}`);
       console.log(`HTTP POST /recommendations -> 200 mode=parallel; workers=${parallel.workerCount}`);
     }
@@ -110,6 +118,31 @@ async function main(): Promise<void> {
     console.log(`| Sequencial | 1 | ${sequentialMedian.toFixed(2)} | ${sequentialScoringMedian.toFixed(2)} | referencia | referencia |`);
     console.log(`| Paralelo | ${workerCount} | ${parallelMedian.toFixed(2)} | ${parallelScoringMedian.toFixed(2)} | ${(sequentialMedian / parallelMedian).toFixed(2)}x | ${(sequentialScoringMedian / parallelScoringMedian).toFixed(2)}x |`);
     console.log(`Resultados equivalentes: sim (${JSON.parse(expectedIds).length} recomendacoes).`);
+
+    const evidence = [
+      'Artpop - evidencias do benchmark de recomendacoes',
+      `Ambiente: ${process.platform} ${process.arch}; Node ${process.version}; CPUs logicas=${cpus().length}`,
+      `Dados: ${itemCount} produtos sinteticos; aquecimento=1 chamada por modo; repeticoes=${repetitions}; limite=8`,
+      '',
+      '| Repeticao | Sequencial HTTP (ms) | Sequencial pontuacao (ms) | Paralelo HTTP (ms) | Paralelo pontuacao (ms) |',
+      '|---:|---:|---:|---:|---:|',
+      ...sequentialTimes.map((_, index) =>
+        `| ${index + 1} | ${sequentialTimes[index].toFixed(2)} | ${sequentialScoringTimes[index].toFixed(2)} | ${parallelTimes[index].toFixed(2)} | ${parallelScoringTimes[index].toFixed(2)} |`,
+      ),
+      '',
+      '| Modo | Workers | Latencia HTTP mediana (ms) | Calculo do score mediano (ms) |',
+      '|---|---:|---:|---:|',
+      `| Sequencial | 1 | ${sequentialMedian.toFixed(2)} | ${sequentialScoringMedian.toFixed(2)} |`,
+      `| Paralelo | ${workerCount} | ${parallelMedian.toFixed(2)} | ${parallelScoringMedian.toFixed(2)} |`,
+      `Speedup HTTP: ${(sequentialMedian / parallelMedian).toFixed(2)}x`,
+      `Speedup pontuacao: ${(sequentialScoringMedian / parallelScoringMedian).toFixed(2)}x`,
+      `Resultados equivalentes: sim (${JSON.parse(expectedIds).length} recomendacoes)`,
+      '',
+    ].join('\n');
+    const evidenceDirectory = join(process.cwd(), '..', 'docs', 'evidencias');
+    await mkdir(evidenceDirectory, { recursive: true });
+    await writeFile(join(evidenceDirectory, 'benchmark-recomendacoes.md'), evidence, 'utf8');
+    console.log(`Evidencia salva em docs/evidencias/benchmark-recomendacoes.md`);
   } finally {
     if (previousServiceUrl === undefined) delete process.env.RECOMMENDATION_SERVICE_URL;
     else process.env.RECOMMENDATION_SERVICE_URL = previousServiceUrl;
