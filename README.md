@@ -25,8 +25,8 @@ Disciplinas ministradas pelo Professor David Cunha.
 
 | Integrante | Perfil | Foto |
 | --- | --- | --- |
-| injuje | [github.com/injuje](https://github.com/injuje) | <a href="https://github.com/injuje"><img src="https://github.com/injuje.png?size=96" width="96" height="96" alt="injuje"></a> |
-| FelipeLV12 | [github.com/FelipeLV12](https://github.com/FelipeLV12) | <a href="https://github.com/FelipeLV12"><img src="https://github.com/FelipeLV12.png?size=96" width="96" height="96" alt="FelipeLV12"></a> |
+| José Leandro Ventura Rocha da Silva | [github.com/injuje](https://github.com/injuje) | <a href="https://github.com/injuje"><img src="https://github.com/injuje.png?size=96" width="96" height="96" alt="José Leandro Ventura Rocha da Silva"></a> |
+| Felipe Lopes de Vasconcelos | [github.com/FelipeLV12](https://github.com/FelipeLV12) | <a href="https://github.com/FelipeLV12"><img src="https://github.com/FelipeLV12.png?size=96" width="96" height="96" alt="Felipe Lopes de Vasconcelos"></a> |
 
 ## Tecnologias utilizadas
 
