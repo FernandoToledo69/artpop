@@ -372,4 +372,4 @@ Os documentos de apoio ao desenvolvimento estão disponíveis no Google Docs e f
 - O QR Code do Pix e dados da sessão são inicializados após a hidratação para evitar erros SSR/client.
 - O banner de destaque desaparece automaticamente ao buscar ou filtrar obras.
 - O comando de produção do frontend é `npm run build`.
-- Não há testes automatizados, prints ou vídeo versionados no repositório até o momento.
+- O benchmark possui logs versionados com evidências HTTP em [`docs/evidencias/`](docs/evidencias/).
