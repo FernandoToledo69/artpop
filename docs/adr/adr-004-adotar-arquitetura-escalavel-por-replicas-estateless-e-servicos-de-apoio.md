@@ -4,7 +4,7 @@
 - **Data:** 2026-11-23
 - **Autor:** MICHEL DOS SANTOS SERPA (mss8@cesar.school)
 - **Turma:** Embarque (segundas)
-- **Projeto:** Origem · marketplace da economia criativa e do artesanato de Pernambuco
+- **Projeto:** artpop · marketplace da economia criativa e do artesanato de Pernambuco
 
 ## Contexto
 
