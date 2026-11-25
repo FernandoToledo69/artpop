@@ -14,7 +14,7 @@ const registerSchema = z.object({
   password: z.string().min(6),
   phone: z.string().optional(),
   cpf: z.string().optional(),
-  role: z.enum(['buyer', 'artisan', 'admin']).default('buyer'),
+  role: z.enum(['buyer', 'artisan']).default('buyer'),
 });
 
 const loginSchema = z.object({
@@ -22,8 +22,8 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
-function roleToPrisma(role: 'buyer' | 'artisan' | 'admin') {
-  return role === 'artisan' ? 'ARTISAN' : role === 'admin' ? 'ADMIN' : 'BUYER';
+function roleToPrisma(role: 'buyer' | 'artisan') {
+  return role === 'artisan' ? 'ARTISAN' : 'BUYER';
 }
 
 function publicUser(user: { id: string; name: string; email: string; role: 'BUYER' | 'ARTISAN' | 'ADMIN'; cpfLast4: string | null; artisan: { id: string } | null }) {

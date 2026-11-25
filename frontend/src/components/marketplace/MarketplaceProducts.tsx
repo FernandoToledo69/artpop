@@ -2,7 +2,7 @@
 
 import type { MouseEvent } from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import { readCatalogProducts } from '../../services/api/produtos.service';
+import { fetchCatalogProducts } from '../../services/api/produtos.service';
 import { Product } from '../../types/produto';
 import { demoProducts } from '../../mocks/products';
 import { readFavoriteIds, toggleFavorite } from '../../services/api/favoritos.service';
@@ -27,9 +27,12 @@ export default function MarketplaceProducts() {
   const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
-    try { setProducts(readCatalogProducts()); setFavoriteIds(readFavoriteIds()); setQuery(new URLSearchParams(window.location.search).get('q') ?? ''); }
-    catch (error) { setLoadError(error instanceof Error ? error.message : 'Não foi possível carregar a vitrine.'); }
-    finally { setIsLoading(false); }
+    fetchCatalogProducts()
+      .then(setProducts)
+      .catch((error: unknown) => setLoadError(error instanceof Error ? error.message : 'Não foi possível carregar a vitrine.'))
+      .finally(() => setIsLoading(false));
+    setFavoriteIds(readFavoriteIds());
+    setQuery(new URLSearchParams(window.location.search).get('q') ?? '');
   }, []);
 
   function handleFavorite(event: MouseEvent<HTMLButtonElement>, productId: string) {

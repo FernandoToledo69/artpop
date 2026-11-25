@@ -28,7 +28,11 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
 		},
 		credentials: 'include',
 	});
-	if (!response.ok) throw new Error(`A API retornou status ${response.status}.`);
+	if (!response.ok) {
+		const body = await response.json().catch(() => undefined) as { error?: unknown } | undefined;
+		const message = typeof body?.error === 'string' ? body.error : `A API retornou status ${response.status}.`;
+		throw new Error(message);
+	}
 	if (response.status === 204) return undefined as T;
 	return response.json() as Promise<T>;
 }

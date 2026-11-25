@@ -2,10 +2,13 @@ import { Product } from '../../types/produto';
 import { PublicArtisanProfile } from '../../types/usuario';
 import { readArtisanProfileForUser } from './usuarios.service';
 import { readCatalogProducts } from './produtos.service';
+import { apiFetch, isApiConfigured } from './client';
+
+export type ArtisanProductSummary = Pick<Product, 'id' | 'title' | 'technique' | 'price' | 'stock' | 'mainImage' | 'additionalImages'>;
 
 export interface ArtisanSummary extends PublicArtisanProfile {
   id: string;
-  products: Product[];
+  products: ArtisanProductSummary[];
 }
 
 function slugify(value: string): string { return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
@@ -37,3 +40,13 @@ export function readArtisans(): ArtisanSummary[] {
 }
 
 export function readArtisanById(id: string): ArtisanSummary | null { return readArtisans().find((artisan) => artisan.id === id) ?? null; }
+
+export async function fetchPublicArtisans(): Promise<ArtisanSummary[]> {
+  if (!isApiConfigured()) return readArtisans();
+  return apiFetch<ArtisanSummary[]>('/api/artesoes');
+}
+
+export async function fetchPublicArtisanById(id: string): Promise<ArtisanSummary | null> {
+  if (!isApiConfigured()) return readArtisanById(id);
+  return apiFetch<ArtisanSummary>(`/api/artesoes/${encodeURIComponent(id)}`);
+}

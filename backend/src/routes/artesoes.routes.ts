@@ -10,6 +10,7 @@ export const artisanRoutes = Router();
 artisanRoutes.get('/', async (_req, res, next) => {
   try {
     const artisans = await prisma.artisan.findMany({
+      where: { status: 'ACTIVE' },
       include: { products: true },
       orderBy: { name: 'asc' },
     });
@@ -24,9 +25,11 @@ artisanRoutes.get('/', async (_req, res, next) => {
       products: artisan.products.map((product) => ({
         id: product.id,
         title: product.title,
+        technique: product.technique,
         price: Number(product.price),
         stock: product.stock,
         mainImage: product.mainImage,
+        additionalImages: product.additionalImages,
       })),
     })));
   } catch (error) {
@@ -40,7 +43,7 @@ artisanRoutes.get('/:id', async (req, res, next) => {
       where: { id: req.params.id },
       include: { products: true },
     });
-    if (!artisan) throw new AppError(404, 'Artesão não encontrado.');
+    if (!artisan || artisan.status !== 'ACTIVE') throw new AppError(404, 'Artesão não encontrado.');
     res.json({
       id: artisan.id,
       name: artisan.name,
@@ -49,7 +52,15 @@ artisanRoutes.get('/:id', async (req, res, next) => {
       phone: artisan.phone,
       bio: artisan.bio,
       avatarImage: artisan.avatarImage,
-      products: artisan.products,
+      products: artisan.products.map((product) => ({
+        id: product.id,
+        title: product.title,
+        technique: product.technique,
+        price: Number(product.price),
+        stock: product.stock,
+        mainImage: product.mainImage,
+        additionalImages: product.additionalImages,
+      })),
     });
   } catch (error) {
     next(error);

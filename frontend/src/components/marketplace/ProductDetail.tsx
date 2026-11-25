@@ -1,14 +1,16 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
-import { isProductOwner, readCatalogProducts } from '../../services/api/produtos.service';
+import { fetchCatalogProducts, isProductOwner } from '../../services/api/produtos.service';
 import { getCurrentUser } from '../../services/api/auth.service';
 import { Product } from '../../types/produto';
 import { demoProducts } from '../../mocks/products';
 import { addToCart } from '../../services/api/carrinho.service';
 import ShippingCalculator from '../carrinho/ShippingCalculator';
 import { fetchRelatedProducts } from '../../services/api/recomendacoes.services';
+import { isApiConfigured } from '../../services/api/client';
 import ProfileAvatar from '../ui/ProfileAvatar';
+import LoadingState from '../feedback/LoadingState';
 
 const stories: Record<string, string> = {
   Recife: 'Artista recifense, transforma memórias da cidade em objetos que carregam textura, cor e afeto. Seu trabalho nasce de encontros entre a matéria e as paisagens do cotidiano.',
@@ -30,21 +32,34 @@ export default function ProductDetail({ productId }: { productId: string }) {
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [recommendationError, setRecommendationError] = useState(false);
+  const [isLoadingProduct, setIsLoadingProduct] = useState(true);
+  const [productLoadError, setProductLoadError] = useState('');
 
   useEffect(() => {
-    const foundProduct = readCatalogProducts().find((item) => item.id === productId);
-    setProduct(foundProduct ?? null);
+    let active = true;
+    setProduct(null);
+    setIsLoadingProduct(true);
+    setProductLoadError('');
     setActiveImage(0);
     setRelatedProducts([]);
     setRecommendationError(false);
-    if (!foundProduct) return;
-
-    let active = true;
-    fetchRelatedProducts(foundProduct, 3).then((products) => {
-      if (active) setRelatedProducts(products);
+    fetchCatalogProducts().then((products) => {
+      if (!active) return;
+      const foundProduct = products.find((item) => item.id === productId);
+      setProduct(foundProduct ?? null);
+      setIsLoadingProduct(false);
+      if (!foundProduct) return;
+      fetchRelatedProducts(foundProduct, 3).then((related) => {
+        if (active) setRelatedProducts(related);
+      }).catch((error: unknown) => {
+        console.error('Failed to load related products:', error);
+        if (active) setRecommendationError(true);
+      });
     }).catch((error: unknown) => {
-      console.error('Failed to load related products:', error);
-      if (active) setRecommendationError(true);
+      if (active) {
+        setProductLoadError(error instanceof Error ? error.message : 'Não foi possível carregar a obra.');
+        setIsLoadingProduct(false);
+      }
     });
     return () => {
       active = false;
@@ -70,11 +85,15 @@ export default function ProductDetail({ productId }: { productId: string }) {
     setCartMessage(`${selectedQuantity} ${selectedQuantity === 1 ? 'unidade de' : 'unidades de'} ${product.title} adicionada(s) ao carrinho.`);
   }
 
-  if (!product) return <div className="catalog-empty"><h2>Obra não encontrada</h2><p>Este anúncio pode ter sido removido ou não está mais disponível.</p><a className="catalog-action" href="/">Voltar para a página inicial</a></div>;
+  if (isLoadingProduct) return <LoadingState message="Carregando obra..." />;
+  if (!product) return <div className="catalog-empty"><h2>{productLoadError ? 'Não foi possível carregar a obra' : 'Obra não encontrada'}</h2><p>{productLoadError || 'Este anúncio pode ter sido removido ou não está mais disponível.'}</p><a className="catalog-action" href="/">Voltar para a página inicial</a></div>;
 
   const currentUser = getCurrentUser();
   const isOwner = isProductOwner(product, currentUser);
   const artisanName = product.artisanName ?? `Ateliê ${product.artisanCity}`;
+  const artisanProfileId = isApiConfigured() && product.artisanId
+    ? product.artisanId
+    : artisanName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   const story = product.artisanBio ?? stories[product.artisanCity] ?? 'Conheça as técnicas e a história por trás desta criação autoral.';
   const galleryImages = [product.mainImage, ...product.additionalImages].filter(Boolean);
   const selectedImage = galleryImages[activeImage] ?? '';
@@ -136,7 +155,7 @@ export default function ProductDetail({ productId }: { productId: string }) {
           persistSelection={false}
         />}
       </div>
-      <section className="artist-story"><p className="eyebrow">QUEM FAZ</p><h2>{artisanName}</h2><p className="artist-location">{product.artisanCity}</p><p>{story}</p><a href={`/artesoes/${artisanName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>Conhecer perfil do artesão</a></section><section className="catalog-section"><div className="catalog-heading"><div><p className="eyebrow">VOCÊ TAMBÉM PODE GOSTAR</p><h2>Outras criações</h2></div></div>{recommendationError && <p role="status">Não foi possível carregar recomendações agora.</p>}<div className="marketplace-grid">{relatedProducts.map((item) => <a className="marketplace-card" href={`/produtos/${item.id}`} key={item.id}><div className="product-image">{item.mainImage ? <img src={item.mainImage} alt="" /> : <span aria-hidden="true">artpop</span>}</div><div className="product-info"><h3>{item.title}</h3><p>{item.technique}</p><strong>R$ {item.price.toFixed(2).replace('.', ',')}</strong></div></a>)}</div></section>
+      <section className="artist-story"><p className="eyebrow">QUEM FAZ</p><h2>{artisanName}</h2><p className="artist-location">{product.artisanCity}</p><p>{story}</p><a href={`/artesoes/${artisanProfileId}`}>Conhecer perfil do artesão</a></section><section className="catalog-section"><div className="catalog-heading"><div><p className="eyebrow">VOCÊ TAMBÉM PODE GOSTAR</p><h2>Outras criações</h2></div></div>{recommendationError && <p role="status">Não foi possível carregar recomendações agora.</p>}<div className="marketplace-grid">{relatedProducts.map((item) => <a className="marketplace-card" href={`/produtos/${item.id}`} key={item.id}><div className="product-image">{item.mainImage ? <img src={item.mainImage} alt="" /> : <span aria-hidden="true">artpop</span>}</div><div className="product-info"><h3>{item.title}</h3><p>{item.technique}</p><strong>R$ {item.price.toFixed(2).replace('.', ',')}</strong></div></a>)}</div></section>
       <section className="review-section"><div><p className="eyebrow">COMUNIDADE</p><h2>Deixe sua impressão</h2><p>Compartilhe o que essa obra despertou em você.</p></div><form onSubmit={handleComment}><div className="review-author"><ProfileAvatar className="review-avatar" label="Foto do seu perfil" /><strong>LG</strong></div><textarea value={comment} onChange={(event) => { setComment(event.target.value); setCommentSaved(false); }} placeholder="Escreva um comentário ou avaliação" rows={4} aria-label="Comentário ou avaliação" /><button type="submit">Publicar comentário</button>{commentSaved && <small role="status">Seu comentário foi publicado.</small>}</form></section>
     </div>
   );

@@ -61,6 +61,7 @@ productRoutes.get('/', async (req, res, next) => {
     const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
     const products = await prisma.product.findMany({
       where: {
+        artisan: { is: { status: 'ACTIVE' } },
         ...(category ? { category } : {}),
         ...(search ? { OR: [
           { title: { contains: search, mode: 'insensitive' } },
@@ -79,7 +80,10 @@ productRoutes.get('/', async (req, res, next) => {
 
 productRoutes.get('/:id', async (req, res, next) => {
   try {
-    const product = await prisma.product.findUnique({ where: { id: String(req.params.id) }, include: { artisan: true } });
+    const product = await prisma.product.findFirst({
+      where: { id: String(req.params.id), artisan: { is: { status: 'ACTIVE' } } },
+      include: { artisan: true },
+    });
     if (!product) throw new AppError(404, 'Produto não encontrado.');
     res.json(mapProduct(product));
   } catch (error) {

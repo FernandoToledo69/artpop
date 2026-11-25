@@ -105,6 +105,8 @@ copy ..\.env.example .env.local
 
 No PowerShell, o mesmo comando pode ser executado a partir do diretório `frontend`. Com `NEXT_PUBLIC_API_URL` configurada, a seção de recomendações na página de produto consulta a API REST. Sem ela, o protótipo continua usando os dados locais.
 
+Para a fila de curadoria, configure `NEXT_PUBLIC_API_URL` no frontend e os parâmetros `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` e `SMTP_FROM` no `backend/.env`. A aprovação exige autenticação administrativa; a reprovação só é concluída depois que o e-mail de justificativa é enviado.
+
 ## Funcionalidades implementadas
 
 ### Vitrine e descoberta de produtos
@@ -168,6 +170,13 @@ No PowerShell, o mesmo comando pode ser executado a partir do diretório `fronte
 - Listagem das obras publicadas com busca por nome, categoria ou técnica.
 - Controle de estoque: atualização de quantidade com confirmação e feedback visual.
 - Links **"Editar"** e **"Ver anúncio"** alinhados lado a lado em cada obra listada, para editar ou acessar a página pública do produto.
+
+### Curadoria de artesãos
+
+- Novos cadastros de artesão ficam pendentes até a aprovação de uma conta administrativa.
+- A fila `/api/admin/artesaos/pendentes` e as ações de aprovação/reprovação são protegidas por autenticação e papel `ADMIN`.
+- Apenas artesãos aprovados e seus produtos são retornados pelas rotas públicas do backend.
+- A reprovação exige justificativa e envio de e-mail via SMTP; sem SMTP configurado, o cadastro permanece pendente e a API informa o erro.
 
 ### Navegação e experiência
 

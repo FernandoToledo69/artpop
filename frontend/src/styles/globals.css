@@ -135,6 +135,12 @@ button { background: var(--orange); } button:hover { background: #b74431; }
 .stock-input span { color: var(--muted); font-size: 12px; padding-right: 10px; }
 .stock-control button { padding: 10px 12px; font-size: 12px; }
 .stock-control small { color: var(--green); font-size: 11px; }
+.artisan-review-list { display: grid; gap: 20px; }
+.artisan-review-card { display: grid; gap: 18px; padding: 22px; border: 1px solid var(--line); background: var(--paper); }
+.artisan-review-card .product-info p { line-height: 1.5; }
+.artisan-review-actions { display: flex; gap: 12px; }
+.moderation-feedback { padding: 0; }
+@media (max-width: 700px) { .artisan-review-actions { flex-direction: column; } }
 .catalog-empty { border: 1px dashed #c4bda9; padding: 46px 24px; text-align: center; margin-top: 22px; }
 .catalog-empty h3 { margin: 0 0 8px; color: var(--green); font-size: 20px; }
 .privacy-content h2 { margin-top: 28px; color: var(--green); }

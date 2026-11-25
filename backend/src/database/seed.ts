@@ -29,6 +29,7 @@ async function main() {
           city: 'Campina Grande',
           state: 'PB',
           bio: 'Peças autorais feitas à mão.',
+          status: 'ACTIVE',
         },
       },
     },

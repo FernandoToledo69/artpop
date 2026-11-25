@@ -2,6 +2,7 @@ import { Product, ProductCategory, ProductDraft } from '../../types/produto';
 import type { AuthUser } from '../../types/auth';
 import { demoProducts } from '../../mocks/products';
 import { readArtisanProfile } from './usuarios.service';
+import { apiFetch, isApiConfigured } from './client';
 
 const STORAGE_KEY = 'origem:products';
 
@@ -100,6 +101,11 @@ export function readCatalogProducts(): Product[] {
     ...product,
     mainImage: product.mainImage || catalogImages[product.id] || '',
   }));
+}
+
+export async function fetchCatalogProducts(): Promise<Product[]> {
+  if (!isApiConfigured()) return readCatalogProducts();
+  return apiFetch<Product[]>('/api/produtos');
 }
 
 export function isProductOwner(product: Product, user: AuthUser | null): boolean {

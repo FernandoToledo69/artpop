@@ -9,10 +9,16 @@ recommendationRoutes.get('/', async (req, res, next) => {
   try {
     const productId = typeof req.query.productId === 'string' ? req.query.productId : undefined;
     const base = productId
-      ? await prisma.product.findUnique({ where: { id: productId }, include: { artisan: true } })
+      ? await prisma.product.findFirst({
+        where: { id: productId, artisan: { is: { status: 'ACTIVE' } } },
+        include: { artisan: true },
+      })
       : null;
     const products = await prisma.product.findMany({
-      where: productId ? { id: { not: productId } } : undefined,
+      where: {
+        artisan: { is: { status: 'ACTIVE' } },
+        ...(productId ? { id: { not: productId } } : {}),
+      },
       include: { artisan: true },
       orderBy: { createdAt: 'desc' },
     });

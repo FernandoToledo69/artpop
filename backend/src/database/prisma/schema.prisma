@@ -13,6 +13,12 @@ enum UserRole {
   ADMIN
 }
 
+enum ArtisanStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+}
+
 enum ProductCategory {
   CERAMICA
   MADEIRA
@@ -55,6 +61,8 @@ model Artisan {
   phone     String    @default("")
   bio       String    @default("")
   avatarImage String  @default("")
+  status          ArtisanStatus @default(PENDING)
+  rejectionReason String?
   products  Product[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

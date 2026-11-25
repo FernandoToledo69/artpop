@@ -1,0 +1,7 @@
+CREATE TYPE "ArtisanStatus" AS ENUM ('PENDING', 'ACTIVE', 'REJECTED');
+
+ALTER TABLE "Artisan"
+  ADD COLUMN "status" "ArtisanStatus" NOT NULL DEFAULT 'ACTIVE',
+  ADD COLUMN "rejectionReason" TEXT;
+
+ALTER TABLE "Artisan" ALTER COLUMN "status" SET DEFAULT 'PENDING';

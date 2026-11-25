@@ -20,6 +20,8 @@ export const swaggerDocument = {
     '/produtos/{id}': { get: { security: [], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: 'Produto' } } } },
     '/carrinho': { get: { summary: 'Listar carrinho', responses: { 200: { description: 'Itens' } } }, delete: { summary: 'Limpar carrinho', responses: { 204: { description: 'Carrinho vazio' } } } },
     '/artesoes': { get: { security: [], summary: 'Listar artesãos', responses: { 200: { description: 'Artesãos' } } } },
+    '/admin/artesaos/pendentes': { get: { summary: 'Listar cadastros de artesãos pendentes', responses: { 200: { description: 'Fila de curadoria' } } } },
+    '/admin/artesaos/{id}/moderacao': { patch: { summary: 'Aprovar ou reprovar cadastro de artesão', responses: { 200: { description: 'Cadastro moderado' }, 409: { description: 'Cadastro já moderado' }, 503: { description: 'SMTP não configurado para reprovação' } } } },
     '/pedidos': { get: { summary: 'Listar pedidos', responses: { 200: { description: 'Pedidos do usuário ou todos para admin' } } } },
     '/pedidos/checkout': { post: { summary: 'Finalizar compra', responses: { 201: { description: 'Pedido criado' } } } },
     '/usuarios/perfil': { get: { summary: 'Obter perfil', responses: { 200: { description: 'Perfil' } } }, patch: { summary: 'Atualizar perfil', responses: { 200: { description: 'Perfil atualizado' } } } },

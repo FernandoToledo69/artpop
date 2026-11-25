@@ -8,10 +8,12 @@ import PublicArtisanProfile from '../../components/artesao/PublicArtisanProfile'
 import ProfileAvatar from '../../components/ui/ProfileAvatar';
 import CartLink from '../../components/ui/CartLink';
 import SiteHeader from '../../components/layout/SiteHeader';
-import { readArtisans } from '../../services/api/artesoes.service';
+import { fetchPublicArtisans } from '../../services/api/artesoes.service';
 
-export default function ArtesoesPage() {
-	const artisans = readArtisans();
+export const dynamic = 'force-dynamic';
+
+export default async function ArtesoesPage() {
+	const artisans = await fetchPublicArtisans();
 	return (
 		<main className="page-shell">
 			<SiteHeader />
