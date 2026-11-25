@@ -16,6 +16,8 @@ export const swaggerDocument = {
     '/health': { get: { security: [], summary: 'Estado da API', responses: { 200: { description: 'API operacional' } } } },
     '/auth/register': { post: { security: [], summary: 'Cadastrar usuário', responses: { 201: { description: 'Usuário criado' } } } },
     '/auth/login': { post: { security: [], summary: 'Autenticar usuário', responses: { 200: { description: 'Token JWT e usuário' } } } },
+    '/auth/refresh': { post: { security: [], summary: 'Renovar token de acesso usando o cookie de refresh', responses: { 200: { description: 'Novo token de acesso' }, 401: { description: 'Sessão expirada' } } } },
+    '/auth/logout': { post: { security: [], summary: 'Revogar a sessão atual', responses: { 204: { description: 'Sessão encerrada' } } } },
     '/produtos': { get: { security: [], summary: 'Listar produtos', responses: { 200: { description: 'Catálogo' } } }, post: { summary: 'Criar produto', responses: { 201: { description: 'Produto criado' } } } },
     '/produtos/{id}': { get: { security: [], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: 'Produto' } } } },
     '/carrinho': { get: { summary: 'Listar carrinho', responses: { 200: { description: 'Itens' } } }, delete: { summary: 'Limpar carrinho', responses: { 204: { description: 'Carrinho vazio' } } } },

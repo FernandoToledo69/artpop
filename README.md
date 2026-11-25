@@ -154,13 +154,13 @@ Para a fila de curadoria, configure `NEXT_PUBLIC_API_URL` no frontend e os parâ
 - Cadastro de comprador ou artesão com nome, e-mail, telefone, CPF e senha.
 - Validação de CPF e telefone no cadastro.
 - Senhas armazenadas como hash SHA-256 na Fake API, sem texto puro.
-- Sessões com expiração após oito horas.
+- JWTs de acesso com validade de 15 minutos e renovação automática por refresh token persistente em cookie `HttpOnly` por até 30 dias.
 - Bloqueio temporário após cinco tentativas de login inválidas.
 - CPF armazenado como hash e últimos quatro dígitos; telefone armazenado mascarado.
 - Consentimento para tratamento de dados e página de [política de privacidade](frontend/src/app/privacidade/page.tsx).
-- Logout limpa sessão, carrinho, frete selecionado e cartão salvo do navegador.
+- Logout revoga a sessão de refresh no backend e limpa a sessão local, o carrinho, o frete selecionado e o cartão salvo do navegador.
 
-> **Limitação de segurança:** como esta versão usa `localStorage`, as medidas acima são adequadas somente ao protótipo. Antes de produção, autenticação, criptografia em repouso, autorização, rate limiting, HTTPS, auditoria, backups, recuperação de senha e controles LGPD devem ser implementados no backend.
+> **Limitação de segurança:** o modo Fake API ainda usa `localStorage` e serve apenas para prototipagem. Com o backend configurado, o JWT de acesso fica apenas em memória no frontend e o refresh token fica em cookie `HttpOnly`; em produção, configure HTTPS, `NODE_ENV=production`, `CORS_ORIGIN` e `NEXT_PUBLIC_API_URL`.
 
 ### Perfil e painel do artesão
 

@@ -44,11 +44,25 @@ model User {
   cpfLast4     String?
   role         UserRole   @default(BUYER)
   artisan      Artisan?
+  refreshSessions RefreshSession[]
   cart         CartItem[]
   orders       Order[]
   reviews      Review[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+}
+
+model RefreshSession {
+  id         String    @id @default(cuid())
+  tokenHash  String    @unique
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId, expiresAt])
 }
 
 model Artisan {

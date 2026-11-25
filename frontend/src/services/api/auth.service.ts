@@ -1,11 +1,12 @@
 import { AccountRecord, AuthUser, UserRole } from '../../types/auth';
-import { apiFetch, setApiToken } from './client';
+import { apiFetch, isApiConfigured, setApiToken } from './client';
+import { clearStoredSession, saveStoredSession, SESSION_KEY } from './auth-session';
 
 const ACCOUNTS_KEY = 'origem:accounts';
-const SESSION_KEY = 'origem:session';
 const LOGIN_ATTEMPTS_KEY = 'origem:login-attempts';
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_MS = 60_000;
+const LOCAL_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 const defaultAccountCredentials = [
   { id: 'admin-1', name: 'Admin artpop', email: 'admin@artpop.local', password: 'admin123', role: 'admin' as const },
@@ -64,20 +65,28 @@ export function getCurrentUser(): AuthUser | null {
   if (typeof window === 'undefined') return null;
   try {
     const user = JSON.parse(localStorage.getItem(SESSION_KEY) ?? 'null') as AuthUser | null;
-    if (user?.expiresAt && user.expiresAt < Date.now()) { localStorage.removeItem(SESSION_KEY); return null; }
+    if (user?.expiresAt && user.expiresAt < Date.now()) {
+      clearStoredSession();
+      setApiToken(null);
+      window.dispatchEvent(new Event('auth-updated'));
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/cadastro') {
+        window.location.assign('/login');
+      }
+      return null;
+    }
     return user;
   } catch { return null; }
 }
 
 export async function login(email: string, password: string): Promise<AuthUser> {
   try {
-    const response = await apiFetch<{ token: string; user: AuthUser }>('/api/auth/login', {
+    const response = await apiFetch<{ token: string; user: AuthUser; expiresAt: number }>('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
     setApiToken(response.token);
-    const user = { ...response.user, expiresAt: Date.now() + 8 * 60 * 60 * 1000 };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    const user = { ...response.user, expiresAt: response.expiresAt };
+    saveStoredSession(user);
     window.dispatchEvent(new Event('auth-updated'));
     return user;
   } catch (error) {
@@ -94,21 +103,21 @@ export async function login(email: string, password: string): Promise<AuthUser> 
     throw new Error('E-mail ou senha inválidos.');
   }
   localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
-  const user: AuthUser = { id: account.id, name: account.name, email: account.email, role: account.role, artisanId: account.artisanId, phoneLast4: account.phoneMasked?.slice(-4), cpfLast4: account.cpfLast4, expiresAt: Date.now() + 8 * 60 * 60 * 1000 };
-  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+  const user: AuthUser = { id: account.id, name: account.name, email: account.email, role: account.role, artisanId: account.artisanId, phoneLast4: account.phoneMasked?.slice(-4), cpfLast4: account.cpfLast4, expiresAt: Date.now() + LOCAL_SESSION_TTL_MS };
+  saveStoredSession(user);
   window.dispatchEvent(new Event('auth-updated'));
   return user;
 }
 
 export async function register(name: string, email: string, password: string, phone: string, cpf: string, role: UserRole = 'buyer'): Promise<AuthUser> {
   try {
-    const response = await apiFetch<{ token: string; user: AuthUser }>('/api/auth/register', {
+    const response = await apiFetch<{ token: string; user: AuthUser; expiresAt: number }>('/api/auth/register', {
       method: 'POST',
       body: JSON.stringify({ name, email, password, phone, cpf, role }),
     });
     setApiToken(response.token);
-    const user = { ...response.user, expiresAt: Date.now() + 8 * 60 * 60 * 1000 };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    const user = { ...response.user, expiresAt: response.expiresAt };
+    saveStoredSession(user);
     window.dispatchEvent(new Event('auth-updated'));
     return user;
   } catch (error) {
@@ -124,9 +133,16 @@ export async function register(name: string, email: string, password: string, ph
   return login(account.email, password);
 }
 
-export function logout(): void {
+export async function logout(): Promise<void> {
+  const logoutRequest = isApiConfigured()
+    ? apiFetch<void>('/api/auth/logout', { method: 'POST' })
+    : Promise.resolve();
   setApiToken(null);
-  localStorage.removeItem(SESSION_KEY);
-  window.dispatchEvent(new Event('auth-updated'));
-  window.dispatchEvent(new Event('cart-updated'));
+  clearStoredSession();
+  try {
+    await logoutRequest;
+  } finally {
+    window.dispatchEvent(new Event('auth-updated'));
+    window.dispatchEvent(new Event('cart-updated'));
+  }
 }

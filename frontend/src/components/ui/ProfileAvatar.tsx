@@ -29,7 +29,17 @@ export default function ProfileAvatar({ className = 'avatar', label = 'Abrir per
 	const initials = userName ? userName.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase() : 'LG';
 	const avatarLabel = userName ? `Abrir perfil de ${userName}` : 'Entrar ou abrir perfil';
 
+	async function handleLogout() {
+		try {
+			await logout();
+		} catch (error) {
+			console.error('Falha ao encerrar a sessão no servidor:', error);
+		} finally {
+			window.location.href = '/login';
+		}
+	}
+
 	if (!withMenu) return <span className={`${className}${image ? ' has-profile-image' : ''}`} aria-label={label}>{image && userName ? <img src={image} alt="Foto do perfil" /> : initials}</span>;
 
-	return <div className="profile-menu"><button className={`${className}${image && userName ? ' has-profile-image' : ''}`} type="button" onClick={() => setIsOpen((current) => !current)} aria-label={label || avatarLabel} aria-expanded={isOpen}>{image && userName ? <img src={image} alt="Foto do perfil" /> : initials}</button>{isOpen && <div className="profile-menu-dropdown">{userName ? <><a href="/pedidos">Meus pedidos</a><a href="/perfil">Editar perfil</a><button type="button" onClick={() => { logout(); window.location.href = '/login'; }}>Sair</button></> : <a href="/login">Entrar</a>}</div>}</div>;
+	return <div className="profile-menu"><button className={`${className}${image && userName ? ' has-profile-image' : ''}`} type="button" onClick={() => setIsOpen((current) => !current)} aria-label={label || avatarLabel} aria-expanded={isOpen}>{image && userName ? <img src={image} alt="Foto do perfil" /> : initials}</button>{isOpen && <div className="profile-menu-dropdown">{userName ? <><a href="/pedidos">Meus pedidos</a><a href="/perfil">Editar perfil</a><button type="button" onClick={() => { void handleLogout(); }}>Sair</button></> : <a href="/login">Entrar</a>}</div>}</div>;
 }
